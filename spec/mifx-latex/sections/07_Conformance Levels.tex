@@ -1,0 +1,48 @@
+\section{Conformance Levels}
+
+MIFX implementations MAY conform at different levels of capability.
+
+Conformance levels describe the degree to which an implementation
+can interpret and process the MIFX core data model.
+They do not define execution behavior.
+
+\subsection{Level 1 --- Structural Conformance}
+
+A Level 1 implementation SHALL:
+
+\begin{itemize}
+\item Parse \texttt{job.xml}
+\item Interpret \texttt{SetupList}, \texttt{ToolList}, and \texttt{OperationList}
+\item Preserve document order
+\item Resolve internal ID references deterministically
+\end{itemize}
+
+Toolpath and geometry artifacts are optional at this level.
+
+\subsection{Level 2 --- Artifact-Aware Conformance}
+
+A Level 2 implementation SHALL meet all Level 1 requirements and:
+
+\begin{itemize}
+\item Resolve \texttt{ArtifactRef} elements
+\item Load toolpath files from \texttt{cldata/}
+\item Validate artifact presence when \texttt{present="true"}
+\end{itemize}
+
+No simulation, verification, or execution behavior is required.
+
+\subsection{Level 3 --- Advanced Interpretation}
+
+A Level 3 implementation MAY:
+
+\begin{itemize}
+\item Interpret Setup transformations for downstream processing
+\item Interpret \texttt{CuttingConditions} as declared machining intent
+\item Perform structural validation beyond basic parsing
+\end{itemize}
+
+Advanced interpretation behavior is implementation-defined and
+outside the normative scope of the MIFX core specification.
+
+MIFX does not define controller syntax, post-processing behavior,
+machine scheduling, or lifecycle orchestration.

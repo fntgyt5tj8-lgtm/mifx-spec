@@ -1,0 +1,49 @@
+\section{Scope and Explicit Exclusions}
+
+This section defines the functional boundaries of the MIFX specification.
+The boundaries defined in this section are normative and binding.
+
+\subsection{In Scope}
+
+MIFX defines a portable, structured representation of machining intent, including:
+
+\begin{itemize}[noitemsep]
+    \item job identity and metadata,
+    \item ordered setups,
+    \item ordered operations,
+    \item tool identity, structural attributes, and references,
+    \item explicit coordinate transformations,
+    \item references to machine-neutral motion data (e.g., APT/CL),
+    \item optional informational geometry associated with setups or tools,
+    \item optional extension blocks.
+\end{itemize}
+
+The specification defines structure and explicit relationships only.
+It does not define execution behavior.
+
+\subsection{Explicit Exclusions}
+
+The following are explicitly outside the scope of MIFX:
+
+\begin{itemize}[noitemsep]
+    \item lifecycle management,
+    \item revision control,
+    \item approval workflows,
+    \item execution tracking,
+    \item inspection feature modeling,
+    \item tolerance definition,
+    \item model-based definition (MBD) surface or face tagging,
+    \item simulation or material removal,
+    \item collision detection,
+    \item axis configuration or machine kinematic models,
+    \item controller-specific NC dialect definition,
+    \item post-processing logic,
+    \item manufacturing execution systems (MES) scheduling,
+    \item enterprise resource planning (ERP) integration,
+    \item digital twin representations.
+\end{itemize}
+
+MIFX does not enforce manufacturing processes, validate machine execution, 
+or replace CAM systems, controllers, or enterprise platforms.
+
+MIFX defines a portable data contract for machining intent exchange.

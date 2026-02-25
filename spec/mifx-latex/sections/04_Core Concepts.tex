@@ -1,0 +1,45 @@
+\section{Core Concepts}
+
+This section defines the primary entities used within a MIFX package.
+
+\subsection{Job}
+
+A Job represents a single machining definition contained within one MIFX package.
+A MIFX package SHALL contain exactly one Job.
+
+\subsection{Setup}
+
+A Setup defines a machining coordinate context under which Operations are performed.
+A Setup may represent a workholding configuration, orientation, or coordinate system.
+Setups SHALL be processed in document order.
+
+\subsection{Operation}
+
+An Operation represents a machining action within a Setup.
+Operations SHALL be processed in document order within a Setup.
+An Operation may reference Tool definitions and Toolpath Artifacts.
+
+\subsection{Tool}
+
+A Tool represents a machining instrument referenced by one or more Operations.
+Tool identity and structural attributes SHALL be defined in \texttt{job.xml}.
+Optional visualization geometry MAY be provided as a separate Geometry Artifact.
+
+\subsection{Toolpath Artifact}
+
+A Toolpath Artifact is a machine-neutral motion file (e.g., APT, CL, NCL).
+Toolpath Artifacts SHALL be stored separately from structural definitions and referenced explicitly by Operations.
+Toolpath Artifacts are non-normative with respect to structural intent.
+
+\subsection{Geometry Artifact}
+
+A Geometry Artifact is an optional file associated with the Job.
+Geometry may represent part definition, setup context, or tool visualization.
+Geometry Artifacts are informational and SHALL NOT alter core semantics.
+
+\subsection{Extension}
+
+An Extension is an optional data block that augments a MIFX package.
+Conforming consumers SHALL ignore unknown Extensions.
+Extensions SHALL NOT redefine, override, or alter core semantics.
+Core validity SHALL NOT depend upon the presence of Extensions.

@@ -1,0 +1,54 @@
+% ---------- Encoding & Fonts ----------
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+
+% ---------- Page Layout ----------
+\usepackage{geometry}
+\geometry{margin=1in}
+
+% ---------- Spacing ----------
+\usepackage{setspace}
+\setstretch{1.15}
+
+% ---------- Hyperlinks ----------
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue
+}
+
+% ---------- Tables ----------
+\usepackage{booktabs}
+\usepackage{longtable}
+
+% ---------- Lists ----------
+\usepackage{enumitem}
+
+% ---------- Graphics ----------
+\usepackage{graphicx}
+
+% ---------- Code Listings ----------
+\usepackage{listings}
+\lstset{
+    basicstyle=\ttfamily\small,
+    frame=single,
+    breaklines=true,
+    columns=fullflexible
+}
+
+% --- in your preamble (once) ---
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric}
+
+% ---------- Section Formatting ----------
+\usepackage{titlesec}
+\titleformat{\section}{\large\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{1em}{}
+
+% ---------- Normative Language (RFC 2119) ----------
+\newcommand{\shall}{\textbf{SHALL}}
+\newcommand{\should}{\textbf{SHOULD}}
+\newcommand{\may}{\textbf{MAY}}
+\newcommand{\shallnot}{\textbf{SHALL NOT}}

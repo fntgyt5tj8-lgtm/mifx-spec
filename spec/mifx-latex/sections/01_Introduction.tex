@@ -1,0 +1,30 @@
+\section{Introduction}
+
+The Machining Intent Format eXchange (MIFX) defines a portable, system-neutral job package for the structured exchange of machining intent between software systems.
+
+MIFX provides a structured representation of:
+
+\begin{itemize}[noitemsep]
+    \item machining setups,
+    \item ordered operations,
+    \item tool references and definitions,
+    \item and optional machine-neutral motion data (e.g., APT/CL) for reference.
+\end{itemize}
+
+The format is designed to reduce ambiguity and information loss in machining job exchange by providing a structured, machine-readable representation.
+
+MIFX does not prescribe how machining is executed, validated, simulated, or governed. It does not define machining strategies, machine capabilities, or execution logic. It does not replace CAM systems, verification tools, machine controllers, or lifecycle management platforms. It provides a portable envelope for machining intent.
+
+A MIFX package is distributed as a single archive file containing:
+
+\begin{itemize}[noitemsep]
+    \item a required intent definition (\texttt{job.xml}),
+    \item optional motion data (\texttt{cldata/}),
+    \item optional geometry (\texttt{geometry/}),
+    \item optional extensions,
+    \item and an optional manifest for file inventory.
+\end{itemize}
+
+A valid MIFX package is defined solely by the presence and correctness of \texttt{job.xml}. All other components are optional and may be ignored by conforming consumers.
+
+MIFX is an open specification intended for unrestricted implementation. Conformance is defined solely by adherence to the published core specification.

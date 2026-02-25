@@ -1,0 +1,109 @@
+\section{Governance Model}
+
+MIFX is an open specification intended for unrestricted implementation and exchange.
+
+\subsection{Open Specification}
+
+The MIFX core specification SHALL be:
+
+\begin{itemize}
+\item Publicly available
+\item Freely implementable
+\item Royalty-free
+\item Not controlled by a commercial vendor
+\end{itemize}
+
+The specification SHALL be publicly versioned and archived.
+No license SHALL restrict reading, writing, or implementing the format.
+
+\subsection{Core Stability Principle}
+
+The MIFX Core Data Model SHALL remain stable within a published major version.
+
+Breaking changes SHALL NOT occur within the same major version.
+
+New capabilities SHALL be introduced only through:
+
+\begin{itemize}
+\item Backward-compatible additions
+\item Optional elements
+\item Extension blocks
+\end{itemize}
+
+Core elements SHALL NOT be removed or redefined within a major version.
+
+\subsection{Minimal Core Philosophy}
+
+The MIFX core SHALL remain intentionally minimal.
+
+The following SHALL NOT become part of the core:
+
+\begin{itemize}
+\item Machine kinematic definitions
+\item Controller dialect specifications
+\item Simulation engines
+\item Feature recognition schemas
+\item Digital twin models
+\end{itemize}
+
+Additions to the core SHALL require demonstrable improvement to interoperability and portability.
+
+If an addition increases complexity without increasing portability, it SHALL be rejected.
+
+\subsection{Extension Mechanism}
+
+Vendors and researchers MAY extend the format using:
+
+\begin{verbatim}
+<Extensions>
+    <Param name="..." value="..."/>
+</Extensions>
+\end{verbatim}
+
+Extensions SHALL NOT modify or override core semantics.
+Core validity SHALL NOT depend on the presence or interpretation of Extensions.
+
+Readers that do not understand an Extension SHALL ignore it without failure.
+
+\subsection{Reference Implementations}
+
+The specification MAY be accompanied by:
+
+\begin{itemize}
+\item A reference Viewer
+\item A reference Exporter
+\end{itemize}
+
+These implementations are illustrative only and SHALL NOT define the standard.
+
+\subsection{No Central Authority Requirement}
+
+MIFX does not require:
+
+\begin{itemize}
+\item A certification body
+\item Vendor approval
+\item Formal consortium membership
+\end{itemize}
+
+Adoption is voluntary and implementation-driven.
+
+\subsection{Versioning}
+
+The root attribute:
+
+\begin{verbatim}
+<Job exportVersion="x.y">
+\end{verbatim}
+
+SHALL indicate the schema revision.
+
+Versioning SHALL follow the model:
+
+\begin{itemize}
+\item Major version (\texttt{x}) --- May introduce structural changes. Backward readability of prior major versions is not guaranteed.
+\item Minor version (\texttt{y}) --- SHALL introduce only backward-compatible additions.
+\item Patch revisions --- SHALL introduce clarifications or corrections without structural change.
+\end{itemize}
+
+Documents conforming to a given major version SHALL remain readable by implementations supporting that major version.

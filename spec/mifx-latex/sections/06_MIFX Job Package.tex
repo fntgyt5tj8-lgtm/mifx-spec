@@ -1,0 +1,92 @@
+\section{MIFX Job Package}
+
+A MIFX Job Package is a single archive file with extension:
+
+\begin{verbatim}
+.mifx
+\end{verbatim}
+
+The archive SHALL be a ZIP-compatible container.
+
+All directory names defined by this specification SHALL be treated as case-sensitive.
+
+The archive SHALL contain:
+
+\begin{verbatim}
+job.xml                     (REQUIRED)
+cldata/                     (REQUIRED if toolpaths referenced)
+geometry/                   (OPTIONAL)
+    in_process/             (OPTIONAL)
+    tooling/                (OPTIONAL)
+extensions/                 (OPTIONAL)
+\end{verbatim}
+
+\subsection{job.xml}
+
+The file \texttt{job.xml} SHALL be located at the root of the archive.
+
+It defines the normative machining intent.
+
+\subsection{cldata/}
+
+The directory \texttt{cldata/} SHALL contain toolpath files referenced by:
+
+\begin{verbatim}
+<ArtifactRef role="toolpath"/>
+\end{verbatim}
+
+Toolpaths SHALL be machine-neutral motion files conforming to ISO 4343 APT/CL
+or a documented equivalent neutral motion format.
+
+If no toolpath artifacts are referenced, the \texttt{cldata/} directory MAY be absent.
+
+\subsection{geometry/}
+
+The directory \texttt{geometry/} MAY contain optional geometry artifacts.
+
+These MAY include:
+
+\begin{itemize}
+\item STEP files
+\item 3MF files
+\item STL files
+\item JSON payloads for in-process or tooling visualization
+\end{itemize}
+
+Geometry artifacts are informational and SHALL NOT affect machining semantics.
+
+\subsection{extensions/}
+
+The directory \texttt{extensions/} MAY contain implementation-specific files.
+
+Examples include:
+
+\begin{itemize}
+\item Vendor metadata
+\item Platform manifests
+\item Scheduling information
+\item Machine-specific configuration
+\end{itemize}
+
+Files located in \texttt{extensions/}:
+
+\begin{itemize}
+\item SHALL NOT alter core MIFX semantics.
+\item SHALL NOT be required for structural interpretation.
+\item SHALL NOT be required for core validity.
+\item MAY be ignored safely by conforming readers.
+\end{itemize}
+
+Core validity SHALL NOT depend upon the presence or interpretation of files in \texttt{extensions/}.
+
+\subsection{Manifest}
+
+No manifest mechanism is defined by the MIFX Core specification.
+
+Platform-specific systems MAY include files such as:
+
+\begin{verbatim}
+extensions/manifest.json
+\end{verbatim}
+
+Such files are outside the normative specification.

@@ -1,0 +1,35 @@
+\section{Design Principles}
+
+The MIFX specification is defined by strict technical constraints intended to preserve clarity, portability, determinism, and neutrality.
+
+\subsection{Single-Package Portability}
+
+A MIFX package SHALL be distributed as a single archive file.
+All information required to interpret the core machining intent SHALL reside within that archive.
+Interpretation of the core intent SHALL NOT require external services, databases, or platform dependencies.
+
+\subsection{Structural Intent Only}
+
+MIFX represents machining intent as structured data and defines no execution semantics.
+It does not define execution behavior, machine control logic, simulation models, verification procedures, or governance mechanisms.
+
+\subsection{Separation of Structure and Motion}
+
+Intent structure SHALL be defined in \texttt{job.xml}.
+Machine-neutral motion data (e.g., APT/CL) SHALL be stored as separate artifacts and referenced explicitly.
+Motion SHALL NOT be embedded within the structural definition.
+
+\subsection{Vendor and System Neutrality}
+
+The specification SHALL NOT assume or depend upon any specific CAM system, controller, simulation platform, or enterprise environment.
+MIFX defines a data structure, not an implementation model.
+
+\subsection{Minimal Surface Area}
+
+The core specification SHALL include only information necessary to describe setups, operations, tools, and motion references.
+Lifecycle management, revision control, inspection modeling, execution tracking, and enterprise orchestration are outside the scope of MIFX.
+
+\subsection{Archival Stability}
+
+Core records SHALL use stable, human-readable, non-binary formats.
+The structure SHALL remain interpretable without proprietary software or vendor-specific infrastructure.

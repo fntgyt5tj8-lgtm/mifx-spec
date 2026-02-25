@@ -1,0 +1,66 @@
+\section{Philosophy and Scope Statement}
+
+MIFX --- Machining Intent Format eXchange --- is a minimal, open specification 
+for the structured representation and exchange of machining intent in a portable, 
+durable, and implementation-independent manner.
+
+\subsection{Purpose}
+
+The purpose of MIFX is to reduce ambiguity and information loss in machining job exchange 
+across organizational and software boundaries.
+
+MIFX provides a stable exchange layer without altering how CAM systems program 
+or how machines execute.
+
+\subsection{Scope}
+
+MIFX defines:
+
+\begin{itemize}
+\item Structured machining intent (Setups, Tools, Operations)
+\item Explicit coordinate systems and transformations
+\item Optional association to machine-neutral APT/CL toolpaths
+\item Optional lightweight visualization geometry
+\end{itemize}
+
+MIFX does not define:
+
+\begin{itemize}
+\item Machine execution
+\item G-code dialects
+\item Simulation models
+\item Digital twins
+\item Controller behavior
+\item Feature recognition schemas
+\end{itemize}
+
+Execution is not intent.
+
+\subsection{Design Principles}
+
+The specification is governed by the following principles:
+
+\begin{enumerate}
+\item \textbf{Minimal Core} --- Only what is required for portable machining intent exchange.
+\item \textbf{Sequential Determinism} --- Document order defines semantic processing order.
+\item \textbf{Explicitness} --- No hidden inference or implicit relationships.
+\item \textbf{Graceful Degradation} --- Optional components SHALL NOT invalidate a conforming job.
+\item \textbf{Longevity} --- Human-readable, non-binary, archivally stable representation.
+\item \textbf{Open Implementation} --- Unrestricted implementation of the core specification.
+\end{enumerate}
+
+\subsection{Strategic Position}
+
+MIFX does not replace CAM systems, post processors, simulation platforms, 
+or digital manufacturing suites. It defines an interoperability layer for 
+structured machining intent exchange.
+
+\subsection{Long-Term Vision}
+
+A MIFX document created today shall remain interpretable decades later, 
+independent of vendor survival or software availability.
+
+If XML parsing capability and ISO 4343 APT/CL documentation remain available, 
+machining intent remains reconstructible.
+
+MIFX is designed to be minimal in scope and stable in structure.

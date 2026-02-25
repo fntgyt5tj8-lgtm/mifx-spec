@@ -1,0 +1,124 @@
+\section{Extension Policy}
+
+MIFX is designed with a minimal normative core and an unrestricted
+extension mechanism.
+
+Extensions enable customization without altering, redefining,
+or fragmenting the core data model.
+
+\subsection{Principle}
+
+The MIFX core specification is normative and stable.
+
+Extensions are:
+
+\begin{itemize}
+    \item OPTIONAL,
+    \item non-normative,
+    \item implementation-defined.
+\end{itemize}
+
+A conforming MIFX document SHALL remain valid and interpretable
+even if all extensions are ignored.
+
+Core validity SHALL NOT depend on the presence,
+interpretation, or processing of extensions.
+
+\subsection{Goals of the Extension Mechanism}
+
+The extension system exists to:
+
+\begin{itemize}
+    \item allow vendor-specific metadata,
+    \item support controller-specific requirements,
+    \item enable enterprise customization,
+    \item accommodate future domain expansion,
+    \item prevent core specification inflation.
+\end{itemize}
+
+Extensions SHALL NOT modify, override, reinterpret,
+or supersede the normative semantics of the MIFX core model.
+
+\subsection{Extension Declaration}
+
+A document MAY declare extension namespaces using
+the \texttt{ExtensionList} element.
+
+\begin{verbatim}
+<ExtensionList>
+  <Extension ns="vendor-name" path="extensions/vendor-name/" />
+</ExtensionList>
+\end{verbatim}
+
+The \texttt{ns} attribute defines a logical namespace identifier.
+
+The \texttt{path} attribute defines the relative directory
+within the MIFX package where extension-specific resources reside.
+
+Each namespace value SHALL be unique within the document.
+
+Consumers that do not recognize a declared namespace
+SHALL ignore it without error.
+
+Unknown elements within declared extension namespaces
+SHALL be ignored unless explicitly required by that extension.
+
+\subsection{Inline Extensions}
+
+Inline extensions MAY be declared within:
+
+\begin{itemize}
+    \item \texttt{Tool} elements
+    \item \texttt{Operation} elements
+\end{itemize}
+
+Example:
+
+\begin{verbatim}
+<Extensions>
+    <Param name="vendor.parameter" value="..."/>
+</Extensions>
+\end{verbatim}
+
+Inline extensions are informational and non-normative.
+
+They SHALL NOT override, redefine, contradict,
+or reinterpret core-defined attributes.
+
+\subsection{External Extension Resources}
+
+A MIFX package MAY include an \texttt{extensions/} directory.
+
+Files within this directory:
+
+\begin{itemize}
+    \item are OPTIONAL,
+    \item MAY follow vendor-defined schemas,
+    \item are outside the scope of this specification.
+\end{itemize}
+
+The presence or absence of extension files
+SHALL NOT affect the validity of the MIFX core document.
+
+\subsection{Non-Interference Clause}
+
+Extensions SHALL NOT:
+
+\begin{itemize}
+    \item alter document order semantics,
+    \item redefine core element meaning,
+    \item introduce hidden structural dependencies,
+    \item require mandatory external services,
+    \item introduce required execution semantics.
+\end{itemize}
+
+Ignoring extensions SHALL NOT cause structural ambiguity
+or invalidate core interpretation.
+
+\subsection{Stability Guarantee}
+
+The existence of extensions SHALL NOT force revision
+of the MIFX core specification.
+
+Core evolution, if any, SHALL remain independent
+of vendor-specific or domain-specific extension mechanisms.
