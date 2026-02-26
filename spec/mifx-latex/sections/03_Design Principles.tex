@@ -4,32 +4,50 @@ The MIFX specification is defined by strict technical constraints intended to pr
 
 \subsection{Single-Package Portability}
 
-A MIFX package SHALL be distributed as a single archive file.
+A MIFX package SHALL be distributed as a single archive file with extension \texttt{.mifx}.
+
 All information required to interpret the core machining intent SHALL reside within that archive.
-Interpretation of the core intent SHALL NOT require external services, databases, or platform dependencies.
+
+Interpretation of the core intent SHALL NOT require external services, databases, network access, or platform-specific infrastructure.
 
 \subsection{Structural Intent Only}
 
 MIFX represents machining intent as structured data and defines no execution semantics.
-It does not define execution behavior, machine control logic, simulation models, verification procedures, or governance mechanisms.
+
+It does not define execution behavior, machine control logic, simulation models, verification procedures, inspection processes, or governance mechanisms.
 
 \subsection{Separation of Structure and Motion}
 
-Intent structure SHALL be defined in \texttt{job.xml}.
-Machine-neutral motion data (e.g., APT/CL) SHALL be stored as separate artifacts and referenced explicitly.
-Motion SHALL NOT be embedded within the structural definition.
+Intent structure SHALL be defined in \texttt{job.json} and associated structured JSON documents.
+
+Machine-neutral motion data (e.g., APT/CL) SHALL be stored as separate artifacts within the package and referenced explicitly via relative paths.
+
+Motion data SHALL NOT be embedded within structural JSON definitions.
 
 \subsection{Vendor and System Neutrality}
 
-The specification SHALL NOT assume or depend upon any specific CAM system, controller, simulation platform, or enterprise environment.
+The specification SHALL NOT assume or depend upon any specific CAM system, controller, simulation platform, enterprise system, or runtime environment.
+
 MIFX defines a data structure, not an implementation model.
 
 \subsection{Minimal Surface Area}
 
-The core specification SHALL include only information necessary to describe setups, operations, tools, and motion references.
-Lifecycle management, revision control, inspection modeling, execution tracking, and enterprise orchestration are outside the scope of MIFX.
+The core specification SHALL include only information necessary to describe setups, operations, tools, coordinate systems, and artifact references.
+
+Lifecycle management, revision control, inspection modeling, execution tracking, enterprise orchestration, and digital twin representations are outside the scope of MIFX.
+
+\subsection{Path-Based Determinism}
+
+All non-core artifacts SHALL be referenced using relative paths within the archive.
+
+No artifact SHALL require implicit discovery rules or environment-dependent resolution.
+
+Document structure and explicit ordering SHALL define semantic processing order.
 
 \subsection{Archival Stability}
 
-Core records SHALL use stable, human-readable, non-binary formats.
+Core records SHALL use stable, human-readable, text-based formats (JSON).
+
 The structure SHALL remain interpretable without proprietary software or vendor-specific infrastructure.
+
+A conforming MIFX archive SHALL remain structurally interpretable independent of database indexing or vendor survival.

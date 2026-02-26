@@ -39,57 +39,54 @@ The extension system exists to:
 Extensions SHALL NOT modify, override, reinterpret,
 or supersede the normative semantics of the MIFX core model.
 
-\subsection{Extension Declaration}
+\subsection{Extension Mechanism}
 
-A document MAY declare extension namespaces using
-the \texttt{ExtensionList} element.
+Extensions MAY be introduced as additional JSON fields within:
 
-\begin{verbatim}
-<ExtensionList>
-  <Extension ns="vendor-name" path="extensions/vendor-name/" />
-</ExtensionList>
-\end{verbatim}
+\begin{itemize}
+    \item \texttt{job.json},
+    \item Setup documents,
+    \item Operation documents,
+    \item Tool definitions.
+\end{itemize}
 
-The \texttt{ns} attribute defines a logical namespace identifier.
+Extension fields SHALL NOT conflict with core-defined property names.
 
-The \texttt{path} attribute defines the relative directory
-within the MIFX package where extension-specific resources reside.
+Extension properties SHOULD use vendor-qualified naming conventions
+(e.g., \texttt{"vendorName.property"} or nested vendor objects)
+to reduce collision risk.
 
-Each namespace value SHALL be unique within the document.
-
-Consumers that do not recognize a declared namespace
+Consumers that do not recognize an extension field
 SHALL ignore it without error.
 
-Unknown elements within declared extension namespaces
-SHALL be ignored unless explicitly required by that extension.
+Unknown fields SHALL NOT invalidate structural parsing.
 
 \subsection{Inline Extensions}
 
-Inline extensions MAY be declared within:
-
-\begin{itemize}
-    \item \texttt{Tool} elements
-    \item \texttt{Operation} elements
-\end{itemize}
+Inline extensions MAY appear as additional JSON properties
+alongside core-defined properties.
 
 Example:
 
 \begin{verbatim}
-<Extensions>
-    <Param name="vendor.parameter" value="..."/>
-</Extensions>
+{
+  "id": "op-1",
+  "setupRef": "set-1",
+  "vendorX.customParameter": "value"
+}
 \end{verbatim}
 
 Inline extensions are informational and non-normative.
 
 They SHALL NOT override, redefine, contradict,
-or reinterpret core-defined attributes.
+or reinterpret core-defined properties.
 
 \subsection{External Extension Resources}
 
-A MIFX package MAY include an \texttt{extensions/} directory.
+A MIFX package MAY include additional files
+that are not referenced by the core model.
 
-Files within this directory:
+Such files:
 
 \begin{itemize}
     \item are OPTIONAL,
@@ -97,16 +94,16 @@ Files within this directory:
     \item are outside the scope of this specification.
 \end{itemize}
 
-The presence or absence of extension files
-SHALL NOT affect the validity of the MIFX core document.
+The presence or absence of such files
+SHALL NOT affect the validity of the MIFX core structure.
 
 \subsection{Non-Interference Clause}
 
 Extensions SHALL NOT:
 
 \begin{itemize}
-    \item alter document order semantics,
-    \item redefine core element meaning,
+    \item alter declared Setup or Operation ordering,
+    \item redefine core property meaning,
     \item introduce hidden structural dependencies,
     \item require mandatory external services,
     \item introduce required execution semantics.

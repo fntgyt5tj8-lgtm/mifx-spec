@@ -5,41 +5,78 @@ This section defines the primary entities used within a MIFX package.
 \subsection{Job}
 
 A Job represents a single machining definition contained within one MIFX package.
-A MIFX package SHALL contain exactly one Job.
+
+A MIFX archive SHALL contain exactly one Job.
+
+The Job entry point SHALL be defined in \texttt{job.json}.  
+The Job document references Setups, Operations, and optional Artifacts using relative paths within the archive.
 
 \subsection{Setup}
 
 A Setup defines a machining coordinate context under which Operations are performed.
+
 A Setup may represent a workholding configuration, orientation, or coordinate system.
-Setups SHALL be processed in document order.
+
+Each Setup SHALL be defined as a separate structured JSON document within the \texttt{setup/} directory.
+
+Setups SHALL be processed in the order referenced by \texttt{job.json}.
 
 \subsection{Operation}
 
 An Operation represents a machining action within a Setup.
-Operations SHALL be processed in document order within a Setup.
-An Operation may reference Tool definitions and Toolpath Artifacts.
+
+Operations SHALL be defined as individual structured JSON documents within the \texttt{operations/} directory.
+
+Operations SHALL be processed in the order defined by the Setup referencing them.
+
+An Operation MAY reference:
+
+\begin{itemize}[noitemsep]
+\item a Tool definition,
+\item a Toolpath Artifact,
+\item optional in-process or visualization artifacts.
+\end{itemize}
 
 \subsection{Tool}
 
 A Tool represents a machining instrument referenced by one or more Operations.
-Tool identity and structural attributes SHALL be defined in \texttt{job.xml}.
-Optional visualization geometry MAY be provided as a separate Geometry Artifact.
+
+Tool structural attributes SHALL be defined in a Tool JSON document located in \texttt{geometry/tooling/}.
+
+Operations reference Tools by identifier.
+
+Optional visualization geometry (e.g., STL) MAY be associated with a Tool via explicit artifact reference.
 
 \subsection{Toolpath Artifact}
 
-A Toolpath Artifact is a machine-neutral motion file (e.g., APT, CL, NCL).
-Toolpath Artifacts SHALL be stored separately from structural definitions and referenced explicitly by Operations.
-Toolpath Artifacts are non-normative with respect to structural intent.
+A Toolpath Artifact is a machine-neutral motion file (e.g., APT, CL).
+
+Toolpath Artifacts SHALL be stored separately from structural JSON definitions and referenced explicitly via relative paths.
+
+Toolpath Artifacts are informational and SHALL NOT redefine structural intent.
 
 \subsection{Geometry Artifact}
 
 A Geometry Artifact is an optional file associated with the Job.
-Geometry may represent part definition, setup context, or tool visualization.
+
+Geometry MAY represent:
+
+\begin{itemize}[noitemsep]
+\item setup context,
+\item part representation,
+\item tool visualization.
+\end{itemize}
+
 Geometry Artifacts are informational and SHALL NOT alter core semantics.
 
 \subsection{Extension}
 
-An Extension is an optional data block that augments a MIFX package.
+An Extension is an optional data block that augments a MIFX document.
+
+Extensions SHALL be namespaced or structurally isolated from core fields.
+
 Conforming consumers SHALL ignore unknown Extensions.
+
 Extensions SHALL NOT redefine, override, or alter core semantics.
+
 Core validity SHALL NOT depend upon the presence of Extensions.

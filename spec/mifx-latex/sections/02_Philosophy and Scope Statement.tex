@@ -4,6 +4,9 @@ MIFX --- Machining Intent Format eXchange --- is a minimal, open specification
 for the structured representation and exchange of machining intent in a portable, 
 durable, and implementation-independent manner.
 
+A MIFX package is a single archive file with extension \texttt{.mifx} containing 
+a canonical JSON intent definition and optional referenced artifacts.
+
 \subsection{Purpose}
 
 The purpose of MIFX is to reduce ambiguity and information loss in machining job exchange 
@@ -12,6 +15,8 @@ across organizational and software boundaries.
 MIFX provides a stable exchange layer without altering how CAM systems program 
 or how machines execute.
 
+It separates intent from execution while preserving explicit structural relationships.
+
 \subsection{Scope}
 
 MIFX defines:
@@ -19,6 +24,8 @@ MIFX defines:
 \begin{itemize}
 \item Structured machining intent (Setups, Tools, Operations)
 \item Explicit coordinate systems and transformations
+\item Deterministic operation ordering
+\item Artifact references via relative paths
 \item Optional association to machine-neutral APT/CL toolpaths
 \item Optional lightweight visualization geometry
 \end{itemize}
@@ -32,6 +39,7 @@ MIFX does not define:
 \item Digital twins
 \item Controller behavior
 \item Feature recognition schemas
+\item CAM strategy definitions
 \end{itemize}
 
 Execution is not intent.
@@ -42,10 +50,12 @@ The specification is governed by the following principles:
 
 \begin{enumerate}
 \item \textbf{Minimal Core} --- Only what is required for portable machining intent exchange.
-\item \textbf{Sequential Determinism} --- Document order defines semantic processing order.
+\item \textbf{Sequential Determinism} --- Operation order defines semantic processing order.
 \item \textbf{Explicitness} --- No hidden inference or implicit relationships.
+\item \textbf{Path-Based Referencing} --- All non-core artifacts are referenced by relative paths within the package.
 \item \textbf{Graceful Degradation} --- Optional components SHALL NOT invalidate a conforming job.
-\item \textbf{Longevity} --- Human-readable, non-binary, archivally stable representation.
+\item \textbf{Longevity} --- Human-readable, text-based, archivally stable representation.
+\item \textbf{Disk Truth} --- The archive contents are authoritative; databases MAY index but SHALL NOT redefine intent.
 \item \textbf{Open Implementation} --- Unrestricted implementation of the core specification.
 \end{enumerate}
 
@@ -55,12 +65,16 @@ MIFX does not replace CAM systems, post processors, simulation platforms,
 or digital manufacturing suites. It defines an interoperability layer for 
 structured machining intent exchange.
 
+It may be consumed directly by standalone viewers or indexed by external systems 
+(e.g., SQL databases) without altering the canonical archive structure.
+
 \subsection{Long-Term Vision}
 
 A MIFX document created today shall remain interpretable decades later, 
 independent of vendor survival or software availability.
 
-If XML parsing capability and ISO 4343 APT/CL documentation remain available, 
+If JSON parsing capability and ISO APT/CL documentation remain available, 
 machining intent remains reconstructible.
 
-MIFX is designed to be minimal in scope and stable in structure.
+MIFX is designed to be minimal in scope, stable in structure, 
+and independent of proprietary runtime systems.

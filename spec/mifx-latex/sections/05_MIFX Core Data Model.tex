@@ -1,271 +1,151 @@
 \section{MIFX Core Data Model}
 
-This section defines the normative structure of the \texttt{job.xml} document.
+This section defines the normative structure of a MIFX package.
 
-The document is strictly sequential.
-Document order defines semantic order.
-Elements SHALL appear in the defined order.
-Consumers SHALL treat document order as semantically significant.
+MIFX uses a modular JSON document model.
+Each primary entity (Job, Setup, Operation, Tool) is defined in a separate JSON file.
+Relationships are expressed through identifiers and relative path references.
+
+Semantic order SHALL be defined explicitly by array order within referencing documents.
 No execution graph, dependency model, or behavioral semantics are defined.
 
-The following structural components are REQUIRED:
+\subsection{Package Entry Point}
+
+Every MIFX archive SHALL contain a file named \texttt{job.json} at the root of the archive.
+
+The \texttt{job.json} file defines:
 
 \begin{itemize}
-    \item Root \texttt{Job} element
-    \item \texttt{Header} element
-    \item Global unit definition
-    \item \texttt{OperationList} element
+    \item global metadata,
+    \item global unit definition,
+    \item ordered references to Setup documents,
+    \item optional global artifact references.
 \end{itemize}
 
-All other elements are OPTIONAL unless explicitly stated.
+Exactly one \texttt{job.json} SHALL exist per archive.
 
-\subsection{Root Element}
+\subsection{Job Structure}
 
-The root element SHALL be:
-
-\begin{verbatim}
-<Job exportVersion="x.y">
-    ...
-</Job>
-\end{verbatim}
-
-The attribute \texttt{exportVersion} identifies the schema revision.
-
-Only one \texttt{Job} element is permitted per document.
-
-\subsection{Root Structure}
-
-The \texttt{Job} element SHALL contain elements in the following order:
-
-\begin{enumerate}
-    \item ExtensionList (optional)
-    \item Header (required)
-    \item SetupList (optional)
-    \item ToolList (optional)
-    \item OperationList (required)
-\end{enumerate}
-
-If present, \texttt{ExtensionList} SHALL appear immediately after
-the opening \texttt{Job} element and before \texttt{Header}.
-
-The absence of \texttt{ExtensionList} implies no declared namespaces.
-
-\subsection{ExtensionList Declaration}
-
-A MIFX document MAY declare extension namespaces
-using an \texttt{ExtensionList} element.
-
-\begin{verbatim}
-<ExtensionList>
-  <Extension ns="acme-cmm" path="extensions/acme-cmm/" />
-  <Extension ns="autodesk" path="extensions/autodesk/" />
-</ExtensionList>
-\end{verbatim}
-
-The \texttt{ns} attribute defines a logical namespace identifier.
-Each namespace value SHALL be unique within the document.
-
-The \texttt{path} attribute defines the relative directory
-within the MIFX package where extension-specific resources reside.
-
-Extension namespaces SHALL NOT redefine, override,
-or alter the normative semantics of the MIFX core data model.
-
-Consumers that do not recognize a declared namespace
-SHALL ignore it without error.
-
-Core validity SHALL NOT depend upon extension-defined namespaces.
-
-\subsection{Header}
-
-The \texttt{Header} element contains provenance and job metadata.
-
-\begin{verbatim}
-<Header>
-    <Export id="UUID" at="ISO8601" by="System" version="x.y"/>
-    <Job>
-        <Name>...</Name>
-        <Units system="metric" linear="mm"/>
-    </Job>
-    <Source>
-        <CAM>...</CAM>
-        <Design>...</Design>
-        <Document>...</Document>
-    </Source>
-</Header>
-\end{verbatim}
-
-The \texttt{system} attribute SHALL be either \texttt{metric} or \texttt{imperial}.
-The \texttt{linear} attribute SHALL be either \texttt{mm} or \texttt{in}.
-
-\textbf{Export} identifies the generating system instance and timestamp.
-\textbf{Units} define the global linear unit system for the document.
-\textbf{Source} is informational and non-normative.
-
-\subsection{SetupList}
-
-Setups define workholding configurations and coordinate transforms.
-
-\begin{verbatim}
-<SetupList>
-    <Setup index="1" id="set-1">
-        ...
-    </Setup>
-</SetupList>
-\end{verbatim}
-
-Setups SHALL be interpreted sequentially by document order.
-The \texttt{id} attribute SHALL be unique within the document.
-
-\subsubsection{Setup Transform}
-
-Each Setup MAY define a 4x4 transformation matrix.
-
-\begin{verbatim}
-<Transform type="matrix4x4"
-           unit="mm"
-           convention="local_to_world"
-           storage="row-major">
-    <Row>...</Row>
-    <Row>...</Row>
-    <Row>...</Row>
-    <Row>...</Row>
-</Transform>
-\end{verbatim}
-
-The matrix defines the Setup coordinate frame relative to the Job world space.
-If omitted, identity transformation SHALL be assumed.
-
-\subsection{ToolList}
-
-Tools define identity and minimal descriptive metadata.
-
-\begin{verbatim}
-<ToolList>
-    <Tool id="main:1" group="main">
-        ...
-    </Tool>
-</ToolList>
-\end{verbatim}
-
-Tool IDs SHALL be unique within the document.
-
-\subsubsection{Tool Extensions}
-
-\begin{verbatim}
-<Extensions>
-    <Param name="holderVendor" value="Maritool" level="display"/>
-    <Param name="calculation_tolerance" value="0.001" level="system"/>
-</Extensions>
-\end{verbatim}
-
-The \texttt{level} attribute is REQUIRED on every \texttt{Param}
-and SHALL be one of:
+The Job document SHALL contain:
 
 \begin{itemize}
-    \item \texttt{level="display"} --- intended for human-facing display
-    \item \texttt{level="system"} --- intended for integration or downstream processing
+    \item \texttt{exportVersion}
+    \item \texttt{header}
+    \item \texttt{units}
+    \item \texttt{setups} (ordered array of setup references)
 \end{itemize}
 
-Extension parameters are non-normative metadata.
-They SHALL NOT alter core document semantics.
-Consumers MAY ignore extension parameters regardless of \texttt{level}.
+The \texttt{setups} array order SHALL define semantic Setup order.
 
-\subsection{OperationList}
+\subsection{Setup Definition}
 
-Operations define machining intent units.
+Each Setup SHALL be defined as a separate JSON document within the \texttt{setup/} directory.
 
-\begin{verbatim}
-<OperationList>
-    <Operation id="op-1"
-               setupRef="set-1"
-               toolRef="main:1">
-        ...
-    </Operation>
-</OperationList>
-\end{verbatim}
-
-Operations SHALL be interpreted sequentially by document order.
-The \texttt{id} attribute SHALL be unique within the document.
-
-If present:
-\begin{itemize}
-    \item \texttt{setupRef} SHALL reference a valid Setup id.
-    \item \texttt{toolRef} SHALL reference a valid Tool id.
-\end{itemize}
-
-\subsubsection{Artifact References}
-
-Operations MAY reference zero or more external artifacts using one or more
-\texttt{ArtifactRef} elements.
-
-\begin{verbatim}
-<ArtifactRef role="toolpath"
-             kind="apt"
-             stem="op-1"
-             present="true"/>
-\end{verbatim}
-
-Artifact references are structured pointers to files contained within the MIFX package.
-
-\paragraph{Resolution Rules}
-
-The directory SHALL be determined by the \texttt{role} value:
+A Setup definition SHALL contain:
 
 \begin{itemize}
-    \item \texttt{toolpath} → \texttt{cldata/}
-    \item \texttt{in\_process\_payload} → \texttt{geometry/in\_process/}
-    \item \texttt{tooling\_payload} → \texttt{geometry/tooling/}
+    \item \texttt{id} (unique within the Job)
+    \item optional transformation matrix
+    \item ordered array of Operation references
 \end{itemize}
 
-The resolved file path SHALL be constructed as:
+Operation order SHALL be defined by array position.
 
-\begin{verbatim}
-<directory>/<stem>.<kind>
-\end{verbatim}
+If no transformation is defined, identity SHALL be assumed.
 
-All directory names defined by this specification SHALL be treated as case-sensitive.
+\subsection{Operation Definition}
 
-If \texttt{present="true"}, the referenced file SHALL exist within the package.
-If \texttt{present="false"} or omitted, the file MAY be absent.
+Each Operation SHALL be defined as a separate JSON document within the \texttt{operations/} directory.
 
-Artifact references SHALL NOT alter core structural semantics.
-
-Additional roles MAY exist via extensions,
-but SHALL NOT redefine or override core semantics.
-Core validity SHALL NOT depend upon extension-defined roles.
-
-\paragraph{Toolpath Artifact}
-
-For \texttt{role="toolpath"}:
+An Operation SHALL contain:
 
 \begin{itemize}
-    \item \texttt{kind} SHALL be either \texttt{apt} or \texttt{cl}
-    \item Files SHALL reside in the \texttt{cldata/} directory
+    \item \texttt{id} (unique within the Job)
+    \item \texttt{setupRef}
+    \item optional \texttt{toolRef}
+    \item optional \texttt{cuttingConditions}
+    \item optional \texttt{artifactRefs}
 \end{itemize}
 
-Toolpath artifacts SHALL conform to ISO 4343 APT/CL
-or a documented equivalent neutral motion format.
+Operations SHALL NOT imply execution behavior.
 
-Toolpath artifacts are non-normative with respect to execution.
-MIFX does not define controller dialects or post-processing behavior.
+\subsection{Tool Definition}
 
-\subsubsection{CuttingConditions}
+Tools SHALL be defined as JSON documents within \texttt{geometry/tooling/}.
+
+A Tool definition SHALL contain:
+
+\begin{itemize}
+    \item \texttt{toolNumber}
+    \item \texttt{toolType}
+    \item optional dimensional attributes
+    \item optional extension metadata
+\end{itemize}
+
+Tool identifiers SHALL be referenced by Operations via \texttt{toolRef}.
+
+Optional visualization geometry (e.g., STL) MAY be referenced explicitly via artifact references.
+
+\subsection{Artifact References}
+
+Artifacts SHALL be referenced using explicit relative paths.
+
+An artifact reference SHALL contain:
+
+\begin{itemize}
+    \item \texttt{role}
+    \item \texttt{kind}
+    \item \texttt{path}
+    \item optional \texttt{present}
+\end{itemize}
+
+Example:
 
 \begin{verbatim}
-<CuttingConditions>
-    <SpindleDir>CW</SpindleDir>
-    <Spindle unit="rpm">...</Spindle>
-    <Feed unit="mm/min">...</Feed>
-    <Coolant>through_tool</Coolant>
-</CuttingConditions>
+{
+  "role": "toolpath",
+  "kind": "apt",
+  "path": "cldata/op-1.apt",
+  "present": true
+}
 \end{verbatim}
 
-These values represent declared intent only and do not define controller behavior.
+Artifact resolution SHALL NOT rely on directory inference rules.
+The \texttt{path} value SHALL be authoritative.
 
-\texttt{SpindleDir} SHALL be either \texttt{CW} or \texttt{CCW}.
-\texttt{Coolant} MAY be \texttt{off}, \texttt{flood}, \texttt{mist},
-\texttt{through\_tool}, \texttt{air}, or \texttt{flood\_tool}.
+If \texttt{present} is \texttt{true}, the referenced file SHALL exist within the archive.
+If \texttt{present} is omitted or \texttt{false}, the file MAY be absent.
+
+Artifacts SHALL NOT redefine structural semantics.
+
+\subsection{Toolpath Artifact}
+
+For toolpath artifacts:
+
+\begin{itemize}
+    \item \texttt{role} SHALL be \texttt{"toolpath"}
+    \item \texttt{kind} SHALL be \texttt{"apt"} or \texttt{"cl"}
+    \item the referenced file SHALL reside within \texttt{cldata/}
+\end{itemize}
+
+Toolpath artifacts are informational and non-normative with respect to execution.
+
+\subsection{CuttingConditions}
+
+An Operation MAY define cutting conditions:
+
+\begin{verbatim}
+{
+  "cuttingConditions": {
+    "spindleDir": "CW",
+    "spindle": { "value": 12000, "unit": "rpm" },
+    "feed": { "value": 350, "unit": "mm/min" },
+    "coolant": "through_tool"
+  }
+}
+\end{verbatim}
+
+These values represent declared intent only and SHALL NOT define controller behavior.
 
 No inheritance model is defined.
 
@@ -274,18 +154,18 @@ No inheritance model is defined.
 A conforming MIFX consumer SHALL be able to:
 
 \begin{itemize}
-    \item parse the XML document,
-    \item reconstruct setup order,
-    \item reconstruct operation order,
-    \item resolve tool and setup references,
-    \item interpret transformation matrices deterministically.
+    \item parse \texttt{job.json},
+    \item reconstruct Setup order from the \texttt{setups} array,
+    \item reconstruct Operation order from Setup references,
+    \item resolve Tool references,
+    \item resolve artifact paths deterministically.
 \end{itemize}
 
 A conforming consumer SHALL produce identical structural interpretation
-given identical document input.
+given identical archive contents.
 
 Consumers SHALL NOT infer implicit relationships beyond those explicitly defined.
 
 MIFX defines structure and relationships only.
-MIFX does not define execution behavior, simulation,
+It does not define execution behavior, simulation models,
 controller syntax, or lifecycle management.

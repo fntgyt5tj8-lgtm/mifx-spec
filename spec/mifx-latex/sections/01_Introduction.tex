@@ -11,20 +11,23 @@ MIFX provides a structured representation of:
     \item and optional machine-neutral motion data (e.g., APT/CL) for reference.
 \end{itemize}
 
-The format is designed to reduce ambiguity and information loss in machining job exchange by providing a structured, machine-readable representation.
+The format is designed to reduce ambiguity and information loss in machining job exchange by providing a structured, machine-readable representation of machining intent.
 
 MIFX does not prescribe how machining is executed, validated, simulated, or governed. It does not define machining strategies, machine capabilities, or execution logic. It does not replace CAM systems, verification tools, machine controllers, or lifecycle management platforms. It provides a portable envelope for machining intent.
 
-A MIFX package is distributed as a single archive file containing:
+A MIFX package is distributed as a single archive file with the extension \texttt{.mifx}. The archive contains:
 
 \begin{itemize}[noitemsep]
-    \item a required intent definition (\texttt{job.xml}),
+    \item a required intent definition file (\texttt{job.json}),
+    \item setup definitions (\texttt{setup/}),
+    \item operation definitions (\texttt{operations/}),
     \item optional motion data (\texttt{cldata/}),
     \item optional geometry (\texttt{geometry/}),
-    \item optional extensions,
-    \item and an optional manifest for file inventory.
+    \item and optional tool payload definitions (\texttt{geometry/tooling/}).
 \end{itemize}
 
-A valid MIFX package is defined solely by the presence and correctness of \texttt{job.xml}. All other components are optional and may be ignored by conforming consumers.
+The file \texttt{job.json} is the sole required entry point of a valid MIFX package. It references all other components using relative paths within the archive.
 
-MIFX is an open specification intended for unrestricted implementation. Conformance is defined solely by adherence to the published core specification.
+All additional components are optional and may be ignored by conforming consumers. Conformance to MIFX is defined solely by adherence to the published JSON specification and structural rules defined in this document.
+
+MIFX is an open specification intended for unrestricted implementation.

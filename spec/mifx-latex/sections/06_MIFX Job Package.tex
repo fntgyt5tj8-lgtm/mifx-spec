@@ -10,83 +10,137 @@ The archive SHALL be a ZIP-compatible container.
 
 All directory names defined by this specification SHALL be treated as case-sensitive.
 
-The archive SHALL contain:
+A conforming MIFX archive SHALL contain exactly one Job and SHALL include the following structure:
 
 \begin{verbatim}
-job.xml                     (REQUIRED)
-cldata/                     (REQUIRED if toolpaths referenced)
-geometry/                   (OPTIONAL)
-    in_process/             (OPTIONAL)
-    tooling/                (OPTIONAL)
-extensions/                 (OPTIONAL)
+job.json                      (REQUIRED)
+
+setup/                        (REQUIRED)
+    setup-1.json
+    setup-2.json
+    ...
+
+operations/                   (REQUIRED)
+    op-1.json
+    op-2.json
+    ...
+
+geometry/                     (OPTIONAL)
+    setup/                    (OPTIONAL)
+        setup-1.3mf
+        setup-x.3mf
+    tooling/                  (OPTIONAL)
+        main-6.json
+        main-6.stl
+
+cldata/                       (OPTIONAL)
+    op-1.apt
+    op-2.apt
 \end{verbatim}
 
-\subsection{job.xml}
+\subsection{job.json}
 
-The file \texttt{job.xml} SHALL be located at the root of the archive.
+The file \texttt{job.json} SHALL be located at the root of the archive.
 
-It defines the normative machining intent.
+It defines the normative machining intent entry point and SHALL reference:
 
-\subsection{cldata/}
+\begin{itemize}
+\item global metadata,
+\item unit definition,
+\item ordered Setup documents.
+\end{itemize}
 
-The directory \texttt{cldata/} SHALL contain toolpath files referenced by:
+Only one \texttt{job.json} file SHALL exist per archive.
 
-\begin{verbatim}
-<ArtifactRef role="toolpath"/>
-\end{verbatim}
+\subsection{setup/}
 
-Toolpaths SHALL be machine-neutral motion files conforming to ISO 4343 APT/CL
-or a documented equivalent neutral motion format.
+The directory \texttt{setup/} SHALL contain one JSON file per Setup.
 
-If no toolpath artifacts are referenced, the \texttt{cldata/} directory MAY be absent.
+Each Setup document SHALL define:
+
+\begin{itemize}
+\item a unique \texttt{id},
+\item optional transformation matrix,
+\item ordered references to Operation documents.
+\end{itemize}
+
+If a Setup is referenced in \texttt{job.json}, its JSON file SHALL exist.
+
+\subsection{operations/}
+
+The directory \texttt{operations/} SHALL contain one JSON file per Operation.
+
+Each Operation SHALL define:
+
+\begin{itemize}
+\item a unique \texttt{id},
+\item \texttt{setupRef},
+\item optional \texttt{toolRef},
+\item optional cutting conditions,
+\item optional artifact references.
+\end{itemize}
+
+If an Operation is referenced by a Setup, its JSON file SHALL exist.
 
 \subsection{geometry/}
 
 The directory \texttt{geometry/} MAY contain optional geometry artifacts.
 
-These MAY include:
+Subdirectories MAY include:
 
 \begin{itemize}
-\item STEP files
-\item 3MF files
-\item STL files
-\item JSON payloads for in-process or tooling visualization
+\item \texttt{setup/} for part or setup geometry (e.g., 3MF, STEP)
+\item \texttt{tooling/} for Tool JSON definitions and optional STL visualization
 \end{itemize}
 
-Geometry artifacts are informational and SHALL NOT affect machining semantics.
+Geometry artifacts are informational and SHALL NOT affect structural semantics.
 
-\subsection{extensions/}
+\subsection{cldata/}
 
-The directory \texttt{extensions/} MAY contain implementation-specific files.
+The directory \texttt{cldata/} MAY contain machine-neutral motion files referenced by Operations.
 
-Examples include:
+If an Operation declares an artifact reference with:
+
+\begin{verbatim}
+"role": "toolpath"
+\end{verbatim}
+
+the referenced file SHALL exist at the specified relative path.
+
+Toolpaths SHALL conform to ISO 4343 APT/CL or a documented equivalent neutral motion format.
+
+If no toolpath artifacts are referenced, the \texttt{cldata/} directory MAY be absent.
+
+\subsection{Path Authority}
+
+All artifact references SHALL use explicit relative paths.
+
+Directory inference rules SHALL NOT be used.
+
+The \texttt{path} value within each artifact reference SHALL be authoritative.
+
+\subsection{Extensions}
+
+MIFX Core does not define a dedicated \texttt{extensions/} directory.
+
+Implementation-specific files MAY be included within the archive provided that:
 
 \begin{itemize}
-\item Vendor metadata
-\item Platform manifests
-\item Scheduling information
-\item Machine-specific configuration
+\item they do not alter core semantics,
+\item they are not required for structural interpretation,
+\item core validity does not depend upon them.
 \end{itemize}
 
-Files located in \texttt{extensions/}:
-
-\begin{itemize}
-\item SHALL NOT alter core MIFX semantics.
-\item SHALL NOT be required for structural interpretation.
-\item SHALL NOT be required for core validity.
-\item MAY be ignored safely by conforming readers.
-\end{itemize}
-
-Core validity SHALL NOT depend upon the presence or interpretation of files in \texttt{extensions/}.
+Conforming consumers SHALL ignore unknown files without error.
 
 \subsection{Manifest}
 
 No manifest mechanism is defined by the MIFX Core specification.
 
-Platform-specific systems MAY include files such as:
+The authoritative structure of a MIFX archive is determined solely by:
 
-\begin{verbatim}
-extensions/manifest.json
-\end{verbatim}
-
-Such files are outside the normative specification.
+\begin{itemize}
+\item the presence of \texttt{job.json},
+\item valid Setup and Operation references,
+\item and explicit artifact path resolution.
+\end{itemize}

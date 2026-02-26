@@ -1,8 +1,8 @@
-PWD /Users/azlanhadi/Dev/JobRun/Spec
+PWD /Users/azlanhadi/mifx-spec/spec/mifx-latex
 INPUT /usr/local/texlive/2025/texmf.cnf
 INPUT /usr/local/texlive/2025/texmf-dist/web2c/texmf.cnf
 INPUT /usr/local/texlive/2025/texmf-var/web2c/pdftex/pdflatex.fmt
-INPUT /Users/azlanhadi/Dev/JobRun/Spec/main.tex
+INPUT /Users/azlanhadi/mifx-spec/spec/mifx-latex/main.tex
 OUTPUT main.log
 INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/base/article.cls
 INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/base/article.cls
@@ -288,7 +288,6 @@ INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/lm/omxlmex.fd
 INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/lm/omxlmex.fd
 INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/lm/omxlmex.fd
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/lm/lmex10.tfm
-INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/lm/ec-lmri12.tfm
 INPUT /usr/local/texlive/2025/texmf-var/fonts/map/pdftex/updmap/pdftex.map
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/lm/ec-lmbx12.tfm
@@ -359,6 +358,11 @@ INPUT ./sections/10_Governance Model.tex
 INPUT ./sections/10_Governance Model.tex
 INPUT ./sections/10_Governance Model.tex
 INPUT sections/10_Governance Model.tex
+INPUT ./sections/11_Extension Policy.tex
+INPUT ./sections/11_Extension Policy.tex
+INPUT ./sections/11_Extension Policy.tex
+INPUT ./sections/11_Extension Policy.tex
+INPUT sections/11_Extension Policy.tex
 INPUT main.aux
 INPUT ./main.out
 INPUT ./main.out
@@ -367,5 +371,4 @@ INPUT /usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/lmbx12.pfb
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/lmr10.pfb
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/lmr12.pfb
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/lmr17.pfb
-INPUT /usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/lmri12.pfb
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/lmtt10.pfb

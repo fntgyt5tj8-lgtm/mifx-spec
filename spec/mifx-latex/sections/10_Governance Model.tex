@@ -14,7 +14,8 @@ The MIFX core specification SHALL be:
 \end{itemize}
 
 The specification SHALL be publicly versioned and archived.
-No license SHALL restrict reading, writing, or implementing the format.
+
+No license SHALL restrict reading, writing, distributing, or implementing the format.
 
 \subsection{Core Stability Principle}
 
@@ -26,11 +27,11 @@ New capabilities SHALL be introduced only through:
 
 \begin{itemize}
 \item Backward-compatible additions
-\item Optional elements
-\item Extension blocks
+\item Optional fields
+\item Extension mechanisms
 \end{itemize}
 
-Core elements SHALL NOT be removed or redefined within a major version.
+Core fields SHALL NOT be removed or redefined within a major version.
 
 \subsection{Minimal Core Philosophy}
 
@@ -44,6 +45,7 @@ The following SHALL NOT become part of the core:
 \item Simulation engines
 \item Feature recognition schemas
 \item Digital twin models
+\item Lifecycle or enterprise orchestration models
 \end{itemize}
 
 Additions to the core SHALL require demonstrable improvement to interoperability and portability.
@@ -52,18 +54,19 @@ If an addition increases complexity without increasing portability, it SHALL be 
 
 \subsection{Extension Mechanism}
 
-Vendors and researchers MAY extend the format using:
+Vendors and researchers MAY extend the format using additional JSON fields that do not conflict with core-defined properties.
 
-\begin{verbatim}
-<Extensions>
-    <Param name="..." value="..."/>
-</Extensions>
-\end{verbatim}
+Extensions:
 
-Extensions SHALL NOT modify or override core semantics.
-Core validity SHALL NOT depend on the presence or interpretation of Extensions.
+\begin{itemize}
+\item SHALL NOT modify or override core semantics.
+\item SHALL NOT redefine required core fields.
+\item SHALL NOT be required for structural validity.
+\end{itemize}
 
-Readers that do not understand an Extension SHALL ignore it without failure.
+Consumers that do not recognize an extension field SHALL ignore it without failure.
+
+Core validity SHALL NOT depend upon extension-defined properties.
 
 \subsection{Reference Implementations}
 
@@ -74,7 +77,7 @@ The specification MAY be accompanied by:
 \item A reference Exporter
 \end{itemize}
 
-These implementations are illustrative only and SHALL NOT define the standard.
+Such implementations are illustrative only and SHALL NOT define or alter the standard.
 
 \subsection{No Central Authority Requirement}
 
@@ -90,20 +93,18 @@ Adoption is voluntary and implementation-driven.
 
 \subsection{Versioning}
 
-The root attribute:
+The version of a MIFX document SHALL be declared in \texttt{job.json} using the field:
 
 \begin{verbatim}
-<Job exportVersion="x.y">
+"exportVersion": "x.y.z"
 \end{verbatim}
-
-SHALL indicate the schema revision.
 
 Versioning SHALL follow the model:
 
 \begin{itemize}
 \item Major version (\texttt{x}) --- May introduce structural changes. Backward readability of prior major versions is not guaranteed.
 \item Minor version (\texttt{y}) --- SHALL introduce only backward-compatible additions.
-\item Patch revisions --- SHALL introduce clarifications or corrections without structural change.
+\item Patch version (\texttt{z}) --- SHALL introduce clarifications or corrections without structural change.
 \end{itemize}
 
 Documents conforming to a given major version SHALL remain readable by implementations supporting that major version.

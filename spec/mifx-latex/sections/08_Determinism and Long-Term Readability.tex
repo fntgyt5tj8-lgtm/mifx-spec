@@ -4,11 +4,11 @@ MIFX SHALL support deterministic interpretation and long-term archival stability
 
 \subsection{Sequential Semantics}
 
-The semantic order of machining intent is defined exclusively by XML document order.
+The semantic order of machining intent is defined exclusively by explicit array order within JSON documents.
 
 \begin{itemize}
-\item Setups SHALL be interpreted in the order they appear in \texttt{SetupList}.
-\item Operations SHALL be interpreted in the order they appear in \texttt{OperationList}.
+\item Setups SHALL be interpreted in the order listed in the \texttt{setups} array of \texttt{job.json}.
+\item Operations SHALL be interpreted in the order referenced by each Setup.
 \item No dependency graph, execution tree, or parallel structure is defined.
 \end{itemize}
 
@@ -16,12 +16,12 @@ Reordering elements defined as sequential SHALL be considered a semantic modific
 
 \subsection{Explicit Referencing}
 
-All relationships SHALL be explicit:
+All relationships SHALL be explicit.
 
 \begin{itemize}
 \item Operations reference Setups via \texttt{setupRef}.
 \item Operations reference Tools via \texttt{toolRef}.
-\item External files are referenced via \texttt{ArtifactRef}.
+\item External artifacts are referenced via explicit relative \texttt{path} fields.
 \end{itemize}
 
 Consumers SHALL NOT infer implicit relationships beyond those explicitly defined.
@@ -31,20 +31,21 @@ Consumers SHALL NOT infer implicit relationships beyond those explicitly defined
 Coordinate transformations SHALL be represented explicitly as 4x4 matrices.
 
 \begin{itemize}
-\item Storage format SHALL be declared.
+\item Matrix storage order SHALL be declared.
 \item Units SHALL be declared.
-\item Convention SHALL be declared.
+\item Coordinate convention SHALL be declared.
 \end{itemize}
 
-The transformation matrix SHALL be interpreted exactly as declared without inferred coordinate system assumptions.
+Transformation matrices SHALL be interpreted exactly as declared without inferred coordinate system assumptions.
 
 No hidden orientation logic is permitted.
 
 \subsection{Unit Declaration}
 
-Linear units SHALL be declared globally in the Header.
+Linear units SHALL be declared in \texttt{job.json}.
 
 All numeric values SHALL respect declared units.
+
 Numeric values SHALL NOT be interpreted under implicit default unit systems.
 
 \subsection{Graceful Degradation}
@@ -52,16 +53,16 @@ Numeric values SHALL NOT be interpreted under implicit default unit systems.
 If optional components are missing:
 
 \begin{itemize}
-\item Missing geometry SHALL NOT invalidate the job.
-\item Missing tool geometry SHALL result in default primitive visualization.
-\item Missing toolpath files SHALL NOT invalidate structural parsing unless explicitly marked \texttt{present="true"}.
+\item Missing geometry SHALL NOT invalidate the Job.
+\item Missing tool visualization geometry SHALL result in default primitive rendering.
+\item Missing toolpath files SHALL NOT invalidate structural parsing unless explicitly declared with \texttt{"present": true}.
 \end{itemize}
 
 MIFX readers SHALL degrade gracefully.
 
 \subsection{Human Readability}
 
-The \texttt{job.xml} document SHALL remain:
+Core MIFX JSON documents SHALL remain:
 
 \begin{itemize}
 \item Plain UTF-8 encoded text.
@@ -69,29 +70,23 @@ The \texttt{job.xml} document SHALL remain:
 \item Free from binary encoding.
 \end{itemize}
 
-The file SHALL remain readable without proprietary tooling.
+Core documents SHALL remain readable without proprietary tooling.
 
 \subsection{Archival Longevity}
 
 MIFX is designed to remain interpretable independent of specific vendor software implementations.
 
-As long as XML parsing capability and ISO 4343 APT/CL specifications remain documented,
+As long as JSON parsing capability and ISO APT/CL specifications remain documented,
 machining intent SHALL remain reconstructible.
 
 \subsection{Forward Compatibility}
 
-Extensions SHALL be encapsulated inside:
+Extensions SHALL be represented as optional JSON fields that do not conflict with core-defined properties.
 
-\begin{verbatim}
-<Extensions>
-    <Param name="..." value="..."/>
-</Extensions>
-\end{verbatim}
+Unknown fields SHALL be ignored without failure.
 
-Unknown extension parameters SHALL be ignored without failure.
+Unknown artifact roles SHALL be ignored unless explicitly required by the core specification.
 
-Unknown elements within declared Extension namespaces SHALL be ignored without error.
-
-Core semantics SHALL NOT depend on Extensions.
+Core validity SHALL NOT depend upon extension-defined fields.
 
 Future core revisions SHALL preserve backward compatibility within the same major version.
