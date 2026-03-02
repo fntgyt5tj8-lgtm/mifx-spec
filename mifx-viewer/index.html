@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>MIFX Viewer</title>
+  <style>
+    body { font-family: system-ui; margin:0; }
+    #dropzone {
+      height: 100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border:2px dashed #ccc;
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <!-- JSZip FIRST -->
+  <script src="./vendor/jszip.min.js"></script>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "/vendor/three/three.module.js",
+      "three/addons/": "/vendor/three/addons/"
+    }
+  }
+  </script>
+
+  <!-- Then your module -->
+  <script src="/src/core/toolpath/toolpath_apt.js"></script>
+  <script type="module" src="/src/app/main.js"></script>
+</body>
+</html>
