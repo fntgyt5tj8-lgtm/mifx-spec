@@ -16,7 +16,6 @@ import {
   hudMount,
   hudClear,
   hudRegisterTimeline,
-  hudSetFromTimeline,
   hudDestroy,
 } from "/src/render/three/features/hud.js";
 
@@ -161,11 +160,14 @@ export class ThreeRenderer extends Renderer {
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     this.renderer.setSize(w, h);
 
-    this.host.innerHTML = "";
+    // do not wipe viewer overlay owned by viewer.js
+    const oldCanvas = this.host.querySelector("canvas");
+    if (oldCanvas && oldCanvas !== this.renderer.domElement) {
+      oldCanvas.remove();
+    }
     this.host.appendChild(this.renderer.domElement);
 
     // HUD
-    hudMount(this.host);
     hudClear();
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
@@ -214,7 +216,7 @@ export class ThreeRenderer extends Renderer {
       // toolpath parsing + HUD timeline
       loadToolpathsForOps,
       buildHudTimelineFromParsed,
-      hud: { hudClear, hudRegisterTimeline, hudSetFromTimeline },
+      hud: { hudClear, hudRegisterTimeline },
 
       // WCS visibility state from base Renderer
       getWcsVisibility: () => this.getWcsVisibility(),
