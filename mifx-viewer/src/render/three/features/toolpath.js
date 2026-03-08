@@ -13,7 +13,7 @@ export function installToolpaths(ctx) {
   const camera = () => ctx.camera;
 
   const loadToolpathsForOps = ctx.loadToolpathsForOps; // (source, ops) => parsedMap
-  const buildHudTimelineFromParsed = ctx.buildHudTimelineFromParsed; // ({opId,motionPoints,events}) => timeline[]
+  const buildHudTimelineFromParsed = ctx.buildHudTimelineFromParsed; // ({opId,timeline,motionPoints,events}) => timeline[]
   const hud = ctx.hud || {};
   const marker = ctx.marker || null;
 
@@ -282,11 +282,13 @@ export function installToolpaths(ctx) {
         renderPoints: renderPts,
         events: Array.isArray(parsed.events) ? parsed.events : [],
         units: parsed.units,
+        timeline: Array.isArray(parsed.timeline) ? parsed.timeline : [],
       });
 
-      if (typeof buildHudTimelineFromParsed === "function" && motionPoints.length >= 1) {
+      if (typeof buildHudTimelineFromParsed === "function") {
         const timeline = buildHudTimelineFromParsed({
           opId: op.id,
+          timeline: parsed.timeline,
           motionPoints,
           events: parsed.events,
         });
@@ -383,16 +385,6 @@ export function installToolpaths(ctx) {
 
     play.pose = { pos };
 
-    // ---------------------------------------------------
-    // 🔥 TOOL AXIS EXTRACTION (robust)
-    // Accepts numbers OR numeric strings.
-    // Tries common locations:
-    //   p.toolAxis = {i,j,k}
-    //   p.axis = {i,j,k}
-    //   p.hud.toolAxis = {i,j,k}
-    //   p.hud.taxis = {i,j,k}
-    //   p.i/p.j/p.k
-    // ---------------------------------------------------
     function _axisFrom(obj) {
       if (!obj) return null;
       const i = Number(obj.i);
@@ -407,7 +399,7 @@ export function installToolpaths(ctx) {
       _axisFrom(p?.axis) ||
       _axisFrom(p?.hud?.toolAxis) ||
       _axisFrom(p?.hud?.taxis) ||
-      _axisFrom(p?.hud?.tool_axis) || // in case snake_case
+      _axisFrom(p?.hud?.tool_axis) ||
       null;
 
     if (!axis) {
@@ -425,15 +417,11 @@ export function installToolpaths(ctx) {
       marker?.clearToolAxis?.();
     }
 
-    // ---------------------------------------------------
-    // Move marker/tool
-    // ---------------------------------------------------
     marker?.setPosition?.(pos, {
       cameraFacing: true,
       autoScale: true,
     });
 
-    // Keep halo facing camera if fallback is active
     const cam = camera();
     if (cam && marker?._debug?.halo) {
       marker._debug.halo.lookAt(cam.position);
@@ -460,9 +448,6 @@ export function installToolpaths(ctx) {
       return;
     }
 
-    // IMPORTANT:
-    // Tool geometry selection comes from renderer.setActiveOperation()
-    // Toolpath only drives pose + tool axis from motion points.
     setPlayback({ opId: active, playing: false, stepIndex: 0 });
   }
 

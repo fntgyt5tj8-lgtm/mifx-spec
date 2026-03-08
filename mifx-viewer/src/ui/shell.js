@@ -1,6 +1,7 @@
 // src/ui/shell.js
 import { renderIntent } from "./intent.js";
 import { renderAnalytics } from "./analytics.js";
+import { renderToolings } from "./toolings.js";
 import { viewerMount } from "./viewer.js";
 
 let _keyHandlerInstalled = false;
@@ -19,6 +20,7 @@ export function renderLoaded(root, onSetupChange) {
           <select id="modeSelect">
             <option value="viewer" selected>Viewer</option>
             <option value="intent">Intent</option>
+            <option value="toolings">Toolings</option>
             <option value="analytics">Analytics</option>
           </select>
         </label>
@@ -40,6 +42,10 @@ export function renderLoaded(root, onSetupChange) {
         <div id="intentRoot"></div>
       </div>
 
+      <div id="viewToolings" style="display:none;flex:1;overflow:auto;padding:20px;">
+        <div id="toolingsRoot"></div>
+      </div>
+
       <div id="viewAnalytics" style="display:none;flex:1;overflow:auto;padding:20px;">
         <div id="analyticsRoot"></div>
       </div>
@@ -49,18 +55,22 @@ export function renderLoaded(root, onSetupChange) {
   function showMode(mode) {
     const viewViewer = document.getElementById("viewViewer");
     const viewIntent = document.getElementById("viewIntent");
+    const viewToolings = document.getElementById("viewToolings");
     const viewAnalytics = document.getElementById("viewAnalytics");
 
-    if (!viewViewer || !viewIntent || !viewAnalytics) return;
+    if (!viewViewer || !viewIntent || !viewToolings || !viewAnalytics) return;
 
     viewViewer.style.display = mode === "viewer" ? "flex" : "none";
     viewIntent.style.display = mode === "intent" ? "block" : "none";
+    viewToolings.style.display = mode === "toolings" ? "block" : "none";
     viewAnalytics.style.display = mode === "analytics" ? "block" : "none";
 
     if (mode === "viewer") {
       viewerMount(onSetupChange);
     } else if (mode === "intent") {
       renderIntent();
+    } else if (mode === "toolings") {
+      renderToolings();
     } else if (mode === "analytics") {
       renderAnalytics();
     }

@@ -45,6 +45,12 @@ function _ensurePreviewState() {
   return p;
 }
 
+function _ensureUiState() {
+  const ui = (state.ui ??= {});
+  if (typeof ui.showSetupCsys !== "boolean") ui.showSetupCsys = true;
+  return ui;
+}
+
 function _applyWcsToRenderer() {
   const p = _ensurePreviewState();
   state.renderer?.setWcsVisibility?.({
@@ -54,11 +60,23 @@ function _applyWcsToRenderer() {
   });
 }
 
+function _applySetupCsysToRenderer() {
+  const ui = _ensureUiState();
+  state.renderer?.setSetupCsysVisible?.(ui.showSetupCsys);
+}
+
 function _updateWcsBtn(btn) {
   if (!btn) return;
   const p = _ensurePreviewState();
   btn.textContent = p.showWcs ? "WCS: ON" : "WCS: OFF";
   btn.style.opacity = p.showWcs ? "1" : "0.65";
+}
+
+function _updateSetupCsysBtn(btn) {
+  if (!btn) return;
+  const ui = _ensureUiState();
+  btn.textContent = ui.showSetupCsys ? "SETUP CSYS: ON" : "SETUP CSYS: OFF";
+  btn.style.opacity = ui.showSetupCsys ? "1" : "0.65";
 }
 
 function _setPlaybackUiEnabled(enabled) {
@@ -142,6 +160,7 @@ function _renderSidebar() {
 
       _renderSidebar();
       viewerSyncPlaybackUi();
+      _applySetupCsysToRenderer();
 
       if (typeof _setupChangeHandler === "function") {
         await _setupChangeHandler(newSetupId);
@@ -254,6 +273,7 @@ function _ensureViewportOverlay() {
 
     bar.innerHTML = `
       <button id="btnWcs" title="Toggle WCS">WCS: ON</button>
+      <button id="btnSetupCsys" title="Toggle setup CSYS">SETUP CSYS: ON</button>
 
       <label style="display:flex;align-items:center;gap:6px;">
         View:
@@ -375,13 +395,24 @@ function _startHudLoop() {
 
 function _wireControlsOnce() {
   const btnWcs = document.getElementById("btnWcs");
+  const btnSetupCsys = document.getElementById("btnSetupCsys");
+
   _updateWcsBtn(btnWcs);
+  _updateSetupCsysBtn(btnSetupCsys);
 
   btnWcs?.addEventListener("click", () => {
     const p = _ensurePreviewState();
     p.showWcs = !p.showWcs;
     _updateWcsBtn(btnWcs);
     _applyWcsToRenderer();
+    _touchHud();
+  });
+
+  btnSetupCsys?.addEventListener("click", () => {
+    const ui = _ensureUiState();
+    ui.showSetupCsys = !ui.showSetupCsys;
+    _updateSetupCsysBtn(btnSetupCsys);
+    _applySetupCsysToRenderer();
     _touchHud();
   });
 
@@ -422,6 +453,7 @@ function _wireControlsOnce() {
   });
 
   _applyWcsToRenderer();
+  _applySetupCsysToRenderer();
 }
 
 function _wireKeysOnce() {
@@ -472,8 +504,13 @@ export function viewerMount(onSetupChange = null) {
     _startHudLoop();
   } else {
     _applyWcsToRenderer();
+    _applySetupCsysToRenderer();
     _updateWcsBtn(document.getElementById("btnWcs"));
+    _updateSetupCsysBtn(document.getElementById("btnSetupCsys"));
   }
+
+  _applySetupCsysToRenderer();
+  _updateSetupCsysBtn(document.getElementById("btnSetupCsys"));
 
   _lastHudActivity = _now() - (HUD_IDLE_HIDE_MS - HUD_FORCE_SHOW_MS);
   _renderHud();

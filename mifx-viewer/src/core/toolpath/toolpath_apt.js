@@ -1,38 +1,4 @@
 // toolpath_apt.js — APT/CL reader (global API)
-//
-// Backwards compatible:
-//   - window.parseAptGotoPoints(text) => flat decimated [{x,y,z}, ...]
-//
-// Minimal API (clean):
-//   - window.parseAptCl(text) => {
-//       units,
-//       flatPoints,
-//       motionPoints,   // truth points for marker/playback + apt line mapping
-//       renderPoints,   // pretty polyline (tessellated arcs)
-//       events: []      // kept only for legacy callers; always empty
-//     }
-//
-// Supported:
-// - FROM treated as GOTO
-// - TLAXIS modal (TLAXIS/i,j,k) (used only for motion classification)
-// - CYCLE modal (CYCLE/..., CYCLE/OFF) (expanded into travel/plunge/retract points)
-// - MOVARC (APT): MOVARC/centerXYZ, axisIJK, r, ANGLE, aDeg
-// - CIRCLE (Creo/general): CIRCLE/centerXYZ, axisIJK, r [, ... , ANGLE,deg]
-//
-// Creo hardening:
-// - Accept "WORD / ..." (spaces around slash)
-// - Handle "$" continuation lines (join physical lines into one logical record)
-// - Ignore "$$" comment lines
-//
-// HUD policy (new):
-// - Each motion point carries the single APT logical record that produced it:
-//     p.apt  -> string
-//     p.n    -> logical line index (0-based)
-// - Use hud.js to display a 5-line window around current point.
-//
-// Rendering policy:
-// - motionPoints remain sparse; arc payload attaches to the END motion point
-// - renderPoints are tessellated for display
 (function () {
   function num(s) {
     const v = Number(String(s).trim());
@@ -89,13 +55,9 @@
     return /^[A-Z_][A-Z0-9_]*$/i.test(tok);
   }
 
-  // -------------------------
-  // Creo-style continuation + comment handling
-  // -------------------------
   function _preprocessCreoLines(text) {
     const rawLines = String(text || "").split(/\r?\n/);
     const out = [];
-
     let buf = "";
 
     function flush() {
@@ -108,15 +70,12 @@
       const raw = String(rawLines[i] || "");
       const t = raw.trim();
       if (!t) continue;
-
-      // Ignore Pro/CL comments ($$...)
       if (t.startsWith("$$")) continue;
 
-      // '$' continuation when only whitespace follows it
       const dollarIdx = raw.indexOf("$");
       let linePart = raw;
-
       let isContinuation = false;
+
       if (dollarIdx >= 0) {
         const after = raw.slice(dollarIdx + 1);
         if (/^\s*$/.test(after)) {
@@ -143,9 +102,6 @@
     return out;
   }
 
-  // -------------------------
-  // Vector helpers (no THREE)
-  // -------------------------
   function v3(x, y, z) {
     return { x, y, z };
   }
@@ -196,7 +152,6 @@
     let rS = sub(S, center);
     let rE = sub(E, center);
 
-    // project into plane normal to axis
     rS = sub(rS, mul(kUnit, dot(kUnit, rS)));
     rE = sub(rE, mul(kUnit, dot(kUnit, rE)));
 
@@ -225,7 +180,6 @@
 
     const sAx = dot(sub(S, C), kUnit);
     const eAx = dot(sub(E, C), kUnit);
-
     const rS = sub(sub(S, C), mul(kUnit, sAx));
 
     function errFor(sign) {
@@ -284,13 +238,10 @@
 
     for (let s = 0; s <= steps; s++) {
       const t = s / steps;
-
       const theta = sweep * t;
       const rRot = rotateAroundAxis(rS, kUnit, theta);
-
       const ax = (1 - t) * sAx + t * eAx;
       const axVec = mul(kUnit, ax);
-
       const P = add(C, add(rRot, axVec));
       pts.push({ x: P.x, y: P.y, z: P.z });
     }
@@ -299,14 +250,9 @@
     return pts;
   }
 
-  // ---------------------------------------------------------
-  // Linear motion classification (tool-axis aware; fallback to world Z)
-  // ---------------------------------------------------------
   function classifyLinearMotion(prev, next, baseMotion, toolAxis, opts = {}) {
     const m = String(baseMotion || "FEED").toUpperCase();
     if (!prev || !next) return m;
-
-    // Only classify feed-like moves; RAPID stays RAPID
     if (m !== "FEED") return m;
 
     const dx = next.x - prev.x;
@@ -317,7 +263,6 @@
     if (dist2 <= 0) return "FEED";
 
     const dist = Math.sqrt(dist2);
-
     const eps = Number.isFinite(opts.eps) ? opts.eps : 1e-6;
     const kDom = Number.isFinite(opts.kDom) ? opts.kDom : 2.0;
 
@@ -333,7 +278,6 @@
 
       const along = dot(d, u);
       const alongAbs = Math.abs(along);
-
       const perp2 = Math.max(0, dist2 - along * along);
       const perp = Math.sqrt(perp2);
 
@@ -343,7 +287,6 @@
       return "FEED";
     }
 
-    // Fallback: world-Z heuristic
     const zDominance = Number.isFinite(opts.zDominance) ? opts.zDominance : 0.85;
     const minDz = Number.isFinite(opts.minDz) ? opts.minDz : 1e-6;
 
@@ -355,9 +298,6 @@
     return dz < 0 ? "PLUNGE" : "RETRACT";
   }
 
-  // -------------------------
-  // TLAXIS parsing (modal)
-  // -------------------------
   function parseTlaxisLine(line) {
     const m = line.match(/^TLAXIS\s*\/\s*(.+)$/i);
     if (!m) return null;
@@ -370,9 +310,6 @@
     return { i, j, k, raw: line };
   }
 
-  // -------------------------
-  // CYCLE parsing (minimal)
-  // -------------------------
   const FEED_MODES = new Set(["IPM", "IPR", "MMPR", "MMPM"]);
 
   function normalizeCycle(cycle) {
@@ -456,9 +393,6 @@
     return { kind: "CYCLE_ON", cycle: cycleObj };
   }
 
-  // -------------------------
-  // Arc line parsers
-  // -------------------------
   function parseMovarcLine(line) {
     const m = line.match(/^MOVARC\s*\/\s*(.+)$/i);
     if (!m) return null;
@@ -521,11 +455,19 @@
   function parseAptCl(text) {
     const lines = _preprocessCreoLines(text);
 
-    // keep shape for legacy callers that still pass events around
     const events = [];
-
     const motionPoints = [];
     const renderPoints = [];
+    const timeline = [];
+
+    function pushTimeline(kind, apt, n, pointIndex = null) {
+      timeline.push({
+        kind: kind || "record",
+        apt: apt || null,
+        n: Number.isFinite(n) ? n : null,
+        pointIndex: Number.isFinite(pointIndex) ? pointIndex : null,
+      });
+    }
 
     function pushRenderPoint(p, motion = null) {
       if (!p) return;
@@ -548,13 +490,11 @@
     }
 
     function pushMotionPoint(pt) {
-      // attach the latest raw APT line so HUD can show it
-      pt.apt = lastApt || null;           // robust (survives flattening)
-      // optionally also keep the old "hud bundle" if you still want it later
-      pt.hud = { apt: lastApt || null };  // minimal
-
+      pt.apt = lastApt || null;
+      pt.hud = { apt: lastApt || null };
       motionPoints.push(pt);
       lastPos = { x: pt.x, y: pt.y, z: pt.z };
+      return motionPoints.length - 1;
     }
 
     let pendingRapid = false;
@@ -563,11 +503,9 @@
     let units = null;
     let activeCycle = null;
 
-    let modalToolAxis = null; // {i,j,k}
+    let modalToolAxis = null;
     let pendingArc = null;
     let lastPos = null;
-
-    // For HUD: last APT logical record (string) that produced a point
     let lastApt = null;
 
     function _axisFromIJK(i, j, k) {
@@ -579,64 +517,64 @@
       const line = String(lines[lineNo] || "").trim();
       if (!line) continue;
 
-      // UNITS
       {
         const m = line.match(/^UNITS\s*\/\s*(.+)$/i);
         if (m) {
           units = m[1].trim().toUpperCase();
+          lastApt = line;
+          pushTimeline("modal", line, lineNo);
           continue;
         }
       }
 
-      // TLAXIS (modal)
       {
         const t = parseTlaxisLine(line);
         if (t) {
           modalToolAxis = { i: t.i, j: t.j, k: t.k };
           lastApt = line;
+          pushTimeline("modal", line, lineNo);
           continue;
         }
       }
 
-      // CYCLE
       {
         const cyc = parseCycleLine(line);
         if (cyc) {
           lastApt = line;
+          pushTimeline("cycle", line, lineNo);
           if (cyc.kind === "CYCLE_OFF") activeCycle = null;
           else activeCycle = cyc.cycle;
           continue;
         }
       }
 
-      // MOVARC pending
       {
         const arc = parseMovarcLine(line);
         if (arc) {
           pendingArc = arc;
           lastApt = line;
+          pushTimeline("arc-def", line, lineNo);
           continue;
         }
       }
 
-      // CIRCLE pending
       {
         const c = parseCircleLine(line);
         if (c) {
           pendingArc = c;
           lastApt = line;
+          pushTimeline("arc-def", line, lineNo);
           continue;
         }
       }
 
-      // RAPID
       if (/^RAPID\b/i.test(line)) {
         pendingRapid = true;
         lastApt = line;
+        pushTimeline("modal", line, lineNo);
         continue;
       }
 
-      // FEDRAT
       {
         const m = line.match(/^FEDRAT\s*\/\s*(.+)$/i);
         if (m) {
@@ -648,23 +586,22 @@
           if (mode) feedMode = mode;
 
           lastApt = line;
+          pushTimeline("modal", line, lineNo);
           continue;
         }
       }
 
-      // FROM/GOTO
       {
         const m = line.match(/^(?:GOTO|FROM)\s*\/\s*(.+)$/i);
         if (m) {
           const p = parseXYZIJKFromArgs(m[1]);
-          lastApt = line; // this is the record the HUD should show for this point
+          lastApt = line;
           if (!p) continue;
 
           const baseMotion = pendingRapid ? "RAPID" : "FEED";
           const inlineAxis = _axisFromIJK(p.i, p.j, p.k);
           const toolAxis = inlineAxis || modalToolAxis || null;
 
-          // Pending arc: this point is END point
           if (pendingArc && lastPos) {
             const startPt = { x: lastPos.x, y: lastPos.y, z: lastPos.z };
             const endPt = { x: p.x, y: p.y, z: p.z };
@@ -687,7 +624,7 @@
               const eAx = dot(sub(v3(endPt.x, endPt.y, endPt.z), arcDef.center), kUnit);
               const isHelix = Math.abs(eAx - sAx) > 1e-9;
 
-              pushMotionPoint({
+              const pointIndex = pushMotionPoint({
                 x: endPt.x,
                 y: endPt.y,
                 z: endPt.z,
@@ -703,12 +640,12 @@
                 n: lineNo,
                 apt: lastApt,
               });
+              pushTimeline("motion", lastApt, lineNo, pointIndex);
 
               const arcPts = tessellateArc(startPt, arcDef, endPt, 5);
               const mtag = isHelix ? "HELIX" : "ARC";
               for (const ap of arcPts) pushRenderPoint(ap, mtag);
             } else {
-              // CIRCLE
               const arcDef = {
                 center: pendingArc.center,
                 axis: pendingArc.axis,
@@ -716,7 +653,6 @@
               };
 
               const kUnit = norm(arcDef.axis);
-
               const S = v3(startPt.x, startPt.y, startPt.z);
               const E = v3(endPt.x, endPt.y, endPt.z);
               const Cc = arcDef.center;
@@ -754,7 +690,7 @@
 
               const isHelix = Math.abs(eAx - sAx) > 1e-9;
 
-              pushMotionPoint({
+              const pointIndex = pushMotionPoint({
                 x: endPt.x,
                 y: endPt.y,
                 z: endPt.z,
@@ -770,6 +706,7 @@
                 n: lineNo,
                 apt: lastApt,
               });
+              pushTimeline("motion", lastApt, lineNo, pointIndex);
 
               const arcPts = tessellateArc(startPt, arcDef, endPt, 5);
               const mtag = isHelix ? "HELIX" : "ARC";
@@ -781,12 +718,10 @@
             continue;
           }
 
-          // Cycle handling (expanded motion points + render polyline)
           if (activeCycle) {
             const travelZ = getCycleTravelZ(activeCycle, p.z);
 
-            // travel
-            pushMotionPoint({
+            let pointIndex = pushMotionPoint({
               x: p.x,
               y: p.y,
               z: travelZ,
@@ -797,9 +732,9 @@
               n: lineNo,
               apt: lastApt,
             });
+            pushTimeline("motion", lastApt, lineNo, pointIndex);
 
-            // plunge
-            pushMotionPoint({
+            pointIndex = pushMotionPoint({
               x: p.x,
               y: p.y,
               z: p.z,
@@ -810,9 +745,9 @@
               n: lineNo,
               apt: lastApt,
             });
+            pushTimeline("motion", lastApt, lineNo, pointIndex);
 
-            // retract
-            pushMotionPoint({
+            pointIndex = pushMotionPoint({
               x: p.x,
               y: p.y,
               z: travelZ,
@@ -823,6 +758,7 @@
               n: lineNo,
               apt: lastApt,
             });
+            pushTimeline("motion", lastApt, lineNo, pointIndex);
 
             pushRenderPoint({ x: p.x, y: p.y, z: travelZ }, "CYCLE_TRAVEL");
             pushRenderPoint({ x: p.x, y: p.y, z: p.z }, "PLUNGE");
@@ -832,7 +768,6 @@
             continue;
           }
 
-          // Linear (tool-axis aware)
           const prev = lastPos ? { x: lastPos.x, y: lastPos.y, z: lastPos.z } : null;
           const next = { x: p.x, y: p.y, z: p.z };
 
@@ -843,7 +778,7 @@
             minDz: 1e-6,
           });
 
-          pushMotionPoint({
+          const pointIndex = pushMotionPoint({
             x: p.x,
             y: p.y,
             z: p.z,
@@ -857,6 +792,7 @@
             n: lineNo,
             apt: lastApt,
           });
+          pushTimeline("motion", lastApt, lineNo, pointIndex);
 
           pushRenderPoint({ x: p.x, y: p.y, z: p.z }, motionClass);
 
@@ -865,13 +801,11 @@
         }
       }
 
-      // END/FINI just updates "lastApt" (if you scrub to it later)
       if (/^(END|FINI)\b/i.test(line)) {
         lastApt = line;
+        pushTimeline("end", line, lineNo);
         continue;
       }
-
-      // Default: do nothing (no events, no HUD pollution)
     }
 
     const flatPoints = decimatePoints(
@@ -879,7 +813,7 @@
       1e-8
     );
 
-    return { units, events, flatPoints, motionPoints, renderPoints };
+    return { units, events, flatPoints, motionPoints, renderPoints, timeline };
   }
 
   function parseAptGotoPoints(text) {
@@ -887,14 +821,23 @@
     return parsed.flatPoints;
   }
 
-  // Timeline builder used by toolpath.js via ctx.buildHudTimelineFromParsed
-  // It returns one entry per motion point, shaped for hud.js:
-  //   { apt: string, n: number }
   window.buildHudTimelineFromAptText = function (text) {
     const parsed = window.parseAptCl(text);
-    return (parsed.motionPoints || []).map((p) => ({
+
+    if (Array.isArray(parsed.timeline) && parsed.timeline.length) {
+      return parsed.timeline.map((r) => ({
+        apt: r?.apt || null,
+        n: r?.n ?? null,
+        kind: r?.kind || "record",
+        pointIndex: r?.pointIndex ?? null,
+      }));
+    }
+
+    return (parsed.motionPoints || []).map((p, idx) => ({
       apt: p?.apt || null,
       n: p?.n ?? null,
+      kind: "motion",
+      pointIndex: idx,
     }));
   };
 

@@ -56,9 +56,23 @@ function _makeOnTopAxes(len = 200) {
 // ------------------------------------------------------------
 // Minimal HUD timeline builder
 // ------------------------------------------------------------
-function buildHudTimelineFromParsed({ motionPoints } = {}) {
+function buildHudTimelineFromParsed({ timeline, motionPoints } = {}) {
+  if (Array.isArray(timeline) && timeline.length) {
+    return timeline.map((r) => ({
+      apt: r?.apt || null,
+      n: Number.isFinite(r?.n) ? r.n : null,
+      kind: r?.kind || "record",
+      pointIndex: Number.isFinite(r?.pointIndex) ? r.pointIndex : null,
+    }));
+  }
+
   const pts = Array.isArray(motionPoints) ? motionPoints : [];
-  return pts.map((p) => ({ apt: p?.apt ?? p?.hud?.apt ?? null }));
+  return pts.map((p, idx) => ({
+    apt: p?.apt ?? p?.hud?.apt ?? null,
+    n: Number.isFinite(p?.n) ? p.n : null,
+    kind: "motion",
+    pointIndex: idx,
+  }));
 }
 
 // ------------------------------------------------------------
