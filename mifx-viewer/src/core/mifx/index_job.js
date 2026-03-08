@@ -1,3 +1,4 @@
+// src/core/mifx/index_job.js
 export function indexJob(job) {
   const setups = new Map();
   const opsBySetup = new Map();
@@ -8,7 +9,7 @@ export function indexJob(job) {
   }
 
   for (const op of job.operations || []) {
-    const sid = op.setupId;
+    const sid = op.setupRef;
     if (!opsBySetup.has(sid)) {
       opsBySetup.set(sid, []);
     }

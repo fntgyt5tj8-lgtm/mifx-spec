@@ -8,24 +8,25 @@ function extOf(path) {
 }
 
 function _getParser() {
-  // Prefer JobRun global parser if you loaded toolpath_apt.js as a classic script
-  const g = (typeof window !== "undefined") ? window : null;
+  const g = typeof window !== "undefined" ? window : null;
   const fn = g && typeof g.parseAptCl === "function" ? g.parseAptCl : null;
   return fn || parseAptClModule;
 }
 
 function _normParsed(parsed) {
-  // We normalize to the fields your ThreeRenderer expects.
-  // Keep any extra fields from the parser as-is.
   if (!parsed || typeof parsed !== "object") return null;
 
   const motionPoints = Array.isArray(parsed.motionPoints)
     ? parsed.motionPoints
-    : (Array.isArray(parsed.points) ? parsed.points : []);
+    : Array.isArray(parsed.points)
+      ? parsed.points
+      : [];
 
   const renderPoints = Array.isArray(parsed.renderPoints)
     ? parsed.renderPoints
-    : (Array.isArray(parsed.flatPoints) ? parsed.flatPoints : motionPoints);
+    : Array.isArray(parsed.flatPoints)
+      ? parsed.flatPoints
+      : motionPoints;
 
   const events = Array.isArray(parsed.events) ? parsed.events : [];
 
@@ -45,22 +46,31 @@ function _normParsed(parsed) {
   };
 }
 
+function findToolpathArtifact(op) {
+  if (op?.artifactRef?.path) return op.artifactRef;
+
+  const arts = op?.artifacts;
+  if (!Array.isArray(arts)) return null;
+
+  for (const a of arts) {
+    if (!a || typeof a !== "object") continue;
+    if (a.role === "toolpath") return a;
+  }
+
+  return null;
+}
+
 export async function loadToolpathsForOps(source, ops) {
   const out = new Map();
   const parseAptCl = _getParser();
 
   for (const op of ops || []) {
     try {
-      const ar = op?.artifactRef;
+      const ar = findToolpathArtifact(op);
       if (!ar?.path || ar.present === false) continue;
 
       const ext = (ar.kind || extOf(ar.path) || "").toLowerCase();
       if (ext !== "apt" && ext !== "cl" && ext !== "cls" && ext !== "txt") continue;
-
-      if (typeof source?.getText !== "function") {
-        console.warn("Toolpath loader: source.getText is missing", source);
-        continue;
-      }
 
       const text = await source.getText(ar.path);
       if (!text) continue;
@@ -71,12 +81,9 @@ export async function loadToolpathsForOps(source, ops) {
 
       out.set(op.id, parsed);
     } catch (err) {
-      console.warn(`Toolpath parse failed for op ${op?.id}:`, err);
+      console.warn(`[load_toolpaths] parse failed for op ${op?.id}:`, err);
     }
   }
-
-  // Debug once, then delete if you want
-  // console.log("Toolpaths parsed:", out.size, "parser=", _getParser().name || "anon");
 
   return out;
 }

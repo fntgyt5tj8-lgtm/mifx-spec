@@ -1,19 +1,7 @@
-// analytics/index.js
-// ------------------------------------------------------------
-// Orchestrator (glue). Keep SMALL.
-// Input contract:
-//   runOpAnalytics({ opId, setupId, motionPoints, units, toolId, machineSettings? })
-//
-// geometry.js: computeLengths(motionPoints) -> { metrics:{...}, warnings:[] }
-// time.js:
-//   - estimateTimeFromMotionPoints(...) -> { totalSec, byMotionSec, unknown?, warnings? }
-//   - OR computeTime(...) -> { metrics:{ timeMinByMotion, totalTimeMin, unknown }, warnings:[] }
-// ------------------------------------------------------------
+// src/analytics/index.js
 
 import { getDefaultMachineSettings } from "./settings.js";
 import { makeOpAnalyticsResult, addByKey, addWarning } from "./model.js";
-import { validateOpAnalytics } from "./validate.js";
-
 import { computeLengths } from "./geometry.js";
 import * as TIME from "./time.js";
 
@@ -24,12 +12,10 @@ function _pickFn(mod, names) {
   return null;
 }
 
-// Prefer seconds-returning estimators first.
-// Fallback to computeTime() which returns minutes.
 const timeEstimate = _pickFn(TIME, [
-  "estimateTimeFromMotionPoints", // ✅ seconds wrapper
-  "estimateOpTime",               // ✅ alias (seconds)
-  "computeTime",                  // minutes fallback
+  "estimateTimeFromMotionPoints",
+  "estimateOpTime",
+  "computeTime",
   "computeOpTime",
   "estimateTime",
 ]);
@@ -39,6 +25,14 @@ function _unitsNorm(u) {
   if (s === "IN" || s === "INCH" || s === "INCHES") return "IN";
   if (s === "MM" || s === "METRIC") return "MM";
   return s || "MM";
+}
+
+function finalizeResult(result) {
+  if (!result?.lengths) result.lengths = { units: null, total: 0, byMotion: {} };
+  if (!result?.timeSec) result.timeSec = { total: 0, byMotion: {}, unknown: null };
+  if (!result?.counts) result.counts = { motionPoints: 0, segments: 0 };
+  if (!Array.isArray(result?.warnings)) result.warnings = [];
+  return result;
 }
 
 export function runOpAnalytics({
@@ -52,13 +46,12 @@ export function runOpAnalytics({
   const programUnits = _unitsNorm(units);
 
   const result = makeOpAnalyticsResult({
-    opId: Number(opId),
-    setupId,
+    opId: opId != null ? String(opId) : null,
+    setupId: setupId != null ? String(setupId) : null,
     programUnits,
-    toolId,
+    toolId: toolId != null ? String(toolId) : null,
   });
 
-  // schema
   result.lengths.units = programUnits;
 
   const mp = Array.isArray(motionPoints) ? motionPoints : [];
@@ -69,14 +62,11 @@ export function runOpAnalytics({
     addWarning(result, "NO_MOTION", "Not enough motion points provided.", {
       motionPoints: mp.length,
     });
-    return validateOpAnalytics(result);
+    return finalizeResult(result);
   }
 
   const ms = machineSettings || getDefaultMachineSettings(programUnits);
 
-  // -----------------
-  // Geometry
-  // -----------------
   try {
     const g = computeLengths(mp);
     const metrics = g?.metrics || {};
@@ -88,7 +78,9 @@ export function runOpAnalytics({
     }
 
     const by = metrics.lengthByMotion || {};
-    for (const k of Object.keys(by)) addByKey(result.lengths.byMotion, k, by[k]);
+    for (const k of Object.keys(by)) {
+      addByKey(result.lengths.byMotion, k, by[k]);
+    }
 
     if (Array.isArray(g?.warnings)) {
       for (const w of g.warnings) {
@@ -100,20 +92,18 @@ export function runOpAnalytics({
     addWarning(result, "GEOM_FAIL", "Geometry computation failed.", String(e?.message || e));
   }
 
-  // -----------------
-  // Time
-  // -----------------
   try {
     if (!timeEstimate) {
       addWarning(result, "TIME_NO_IMPL", "time.js estimator not wired yet.");
-      return validateOpAnalytics(result);
+      return finalizeResult(result);
     }
 
     const t = timeEstimate(mp, ms) || {};
 
-    // Case A: estimator returns seconds (preferred)
     if (Number.isFinite(t.totalSec) || t.byMotionSec) {
-      if (Number.isFinite(t.totalSec)) result.timeSec.total = Number(t.totalSec) || 0;
+      if (Number.isFinite(t.totalSec)) {
+        result.timeSec.total = Number(t.totalSec) || 0;
+      }
 
       const bySec = t.byMotionSec && typeof t.byMotionSec === "object" ? t.byMotionSec : {};
       for (const k of Object.keys(bySec)) {
@@ -122,6 +112,7 @@ export function runOpAnalytics({
       }
 
       if (t.unknown) result.timeSec.unknown = t.unknown;
+      if (t.debug) result.debug = { ...(result.debug || {}), ...t.debug };
 
       if (Array.isArray(t.warnings)) {
         for (const w of t.warnings) {
@@ -130,17 +121,18 @@ export function runOpAnalytics({
         }
       }
 
-      return validateOpAnalytics(result);
+      return finalizeResult(result);
     }
 
-    // Case B: estimator returns minutes (computeTime style)
     const totalMin =
       t?.metrics?.totalTimeMin ??
       t?.totalMin ??
       t?.totalTimeMin ??
       null;
 
-    if (Number.isFinite(totalMin)) result.timeSec.total = Number(totalMin) * 60;
+    if (Number.isFinite(totalMin)) {
+      result.timeSec.total = Number(totalMin) * 60;
+    }
 
     const byMin =
       t?.metrics?.timeMinByMotion ??
@@ -158,6 +150,8 @@ export function runOpAnalytics({
     const unk = t?.metrics?.unknown ?? t?.unknown ?? null;
     if (unk) result.timeSec.unknown = unk;
 
+    if (t?.debug) result.debug = { ...(result.debug || {}), ...t.debug };
+
     if (Array.isArray(t?.warnings)) {
       for (const w of t.warnings) {
         if (typeof w === "string") addWarning(result, "TIME_WARN", w);
@@ -168,5 +162,5 @@ export function runOpAnalytics({
     addWarning(result, "TIME_FAIL", "Time estimation failed.", String(e?.message || e));
   }
 
-  return validateOpAnalytics(result);
+  return finalizeResult(result);
 }

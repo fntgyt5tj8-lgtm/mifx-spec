@@ -643,8 +643,10 @@
           const toks = splitCsvArgs(m[1]);
           const v = toks.length ? num(toks[0]) : null;
           const mode = toks.length >= 2 && isWordToken(toks[1]) ? toks[1].toUpperCase() : null;
-          feed = v;
-          feedMode = mode;
+
+          if (v !== null) feed = v;
+          if (mode) feedMode = mode;
+
           lastApt = line;
           continue;
         }

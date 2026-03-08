@@ -1,12 +1,14 @@
 // src/analytics/run_async.js
-import { analyzeOp } from "./analytics.js";
+import { runOpAnalytics } from "./index.js";
 import { validateOpInput } from "./validate.js";
 
-/**
- * Browser-friendly "async" wrapper for op analytics.
- * IMPORTANT: opId in this project is a STRING like "op-4" (not a number).
- */
-export async function runOpAnalyticsAsync({ opId, setupId, toolId, motionPoints, unitsLinear } = {}) {
+export async function runOpAnalyticsAsync({
+  opId,
+  setupId,
+  toolId,
+  motionPoints,
+  unitsLinear,
+} = {}) {
   const input = {
     opId: opId != null ? String(opId) : null,
     setupId: setupId != null ? String(setupId) : null,
@@ -17,7 +19,6 @@ export async function runOpAnalyticsAsync({ opId, setupId, toolId, motionPoints,
 
   const warnings = validateOpInput(input);
 
-  // If invalid, still return a structured result (with warnings)
   if (warnings.length) {
     return {
       kind: "op_analytics_v0",
@@ -33,7 +34,13 @@ export async function runOpAnalyticsAsync({ opId, setupId, toolId, motionPoints,
     };
   }
 
-  // Run in next tick (keeps UI responsive)
   await new Promise((r) => setTimeout(r, 0));
-  return analyzeOp(input);
+
+  return runOpAnalytics({
+    opId: input.opId,
+    setupId: input.setupId,
+    toolId: input.toolId,
+    motionPoints: input.motionPoints,
+    units: input.unitsLinear,
+  });
 }

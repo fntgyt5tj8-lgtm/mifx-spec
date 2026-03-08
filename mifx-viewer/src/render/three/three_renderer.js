@@ -430,6 +430,9 @@ export class ThreeRenderer extends Renderer {
 
     this.wcs?.autoScaleFromScene?.();
     this.frameAll();
+
+    this.opCsys?.reset?.();
+    this.opCsys?.registerOperations?.(ops);
   }
 
   getPlaybackStepCount(opId) {

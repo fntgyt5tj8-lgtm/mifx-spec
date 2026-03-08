@@ -26,6 +26,17 @@ export function installOpCsys(ctx) {
     if (!obj || typeof obj !== "object") return null;
     if (depth > maxDepth) return null;
 
+    // ------------------------------------------------------------
+    // Preferred new MIFX path:
+    // op.opCsys = { unit, rows }
+    // ------------------------------------------------------------
+    if (_is4x4Rows(obj?.opCsys?.rows)) return obj.opCsys;
+
+    // optional alternate names if your loader uses one of these
+    if (_is4x4Rows(obj?.workplane?.rows)) return obj.workplane;
+    if (_is4x4Rows(obj?.transform?.rows)) return obj.transform;
+
+    // legacy / deep embedded fallback
     if (_is4x4Rows(obj.rows)) return obj;
 
     for (const k of Object.keys(obj)) {
