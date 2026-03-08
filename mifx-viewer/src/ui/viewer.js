@@ -10,7 +10,6 @@ import {
   playbackSetSpeed,
   playbackResetForOpChange,
 } from "../app/playback.js";
-
 import {
   hudMount,
   hudBuildRows,
@@ -18,6 +17,7 @@ import {
 
 let _installed = false;
 let _keysInstalled = false;
+let _setupChangeHandler = null;
 
 let _hudLoop = null;
 let _lastHudActivity = 0;
@@ -92,6 +92,95 @@ function _syncScrubRange() {
   scrub.value = String(Math.max(0, Math.min((n || 1) - 1, Number(v) || 0)));
 }
 
+function _getSetups() {
+  return Array.isArray(state.job?.setups) ? state.job.setups : [];
+}
+
+function _getViewerOps() {
+  return (state.operations || []).filter((op) => op.setupRef === state.activeSetupId);
+}
+
+function _renderSidebar() {
+  const host = document.getElementById("viewerSidebar");
+  if (!host) return;
+
+  const setups = _getSetups();
+  const ops = _getViewerOps();
+
+  host.innerHTML = `
+    <div style="margin-bottom:12px;">
+      <label for="viewerSetupSelect"><b>Setup</b></label>
+      <div style="margin-top:6px;">
+        <select id="viewerSetupSelect" style="width:100%;">
+          ${setups
+            .map(
+              (s) =>
+                `<option value="${String(s.id)}"${
+                  s.id === state.activeSetupId ? " selected" : ""
+                }>${s.name || s.id}</option>`
+            )
+            .join("")}
+        </select>
+      </div>
+    </div>
+
+    <div style="margin-bottom:8px;"><b>Operations</b></div>
+    <ul id="opList" style="padding-left:16px;margin-top:8px;"></ul>
+  `;
+
+  const select = document.getElementById("viewerSetupSelect");
+  if (select) {
+    select.addEventListener("change", async (e) => {
+      const newSetupId = e.target.value || null;
+      state.activeSetupId = newSetupId;
+
+      const setupOps = (state.operations || []).filter((op) => op.setupRef === newSetupId);
+      if (!setupOps.some((op) => op.id === state.activeOpId)) {
+        state.activeOpId = null;
+        state.renderer?.setActiveOperation?.(null);
+      }
+
+      _renderSidebar();
+      viewerSyncPlaybackUi();
+
+      if (typeof _setupChangeHandler === "function") {
+        await _setupChangeHandler(newSetupId);
+      }
+    });
+  }
+
+  const list = document.getElementById("opList");
+  if (!list) return;
+
+  list.innerHTML = "";
+
+  for (const op of ops) {
+    const li = document.createElement("li");
+    li.textContent = op.name || op.id;
+    li.style.cursor = "pointer";
+    li.style.marginBottom = "4px";
+
+    if (state.activeOpId === op.id) {
+      li.style.fontWeight = "600";
+      li.style.color = "#ff5500";
+    }
+
+    li.addEventListener("click", () => {
+      viewerSelectOp(op.id);
+      _renderSidebar();
+    });
+
+    list.appendChild(li);
+  }
+
+  if (!ops.length) {
+    const empty = document.createElement("div");
+    empty.textContent = "No operations in this setup.";
+    empty.style.opacity = "0.7";
+    host.appendChild(empty);
+  }
+}
+
 function _ensureViewportOverlay() {
   const viewport = document.getElementById("viewport");
   if (!viewport) return false;
@@ -100,7 +189,6 @@ function _ensureViewportOverlay() {
     viewport.style.position = "relative";
   }
 
-  // HUD host (top-right)
   let hudHost = document.getElementById("hudHost");
   if (!hudHost) {
     hudHost = document.createElement("div");
@@ -117,7 +205,6 @@ function _ensureViewportOverlay() {
     viewport.appendChild(hudHost);
   }
 
-  // HUD root (viewer owns DOM + style)
   let hudRoot = document.getElementById("mifx-hud");
   if (!hudRoot) {
     hudRoot = document.createElement("div");
@@ -142,10 +229,8 @@ function _ensureViewportOverlay() {
     hudHost.appendChild(hudRoot);
   }
 
-  // Keep API contract alive
   hudMount(hudHost);
 
-  // Controls overlay (bottom bar)
   let bar = document.getElementById("viewerControls");
   if (!bar) {
     bar = document.createElement("div");
@@ -225,12 +310,9 @@ function _renderHud() {
   _lastHudRenderKey = key;
 
   const rows = hudBuildRows(opId, step);
-
   hudRoot.innerHTML = "";
 
-  if (!rows.length) {
-    return;
-  }
+  if (!rows.length) return;
 
   for (const r of rows) {
     const div = document.createElement("div");
@@ -245,9 +327,7 @@ function _renderHud() {
         margin: "0 -6px",
       });
     } else {
-      Object.assign(div.style, {
-        opacity: "0.85",
-      });
+      Object.assign(div.style, { opacity: "0.85" });
     }
 
     hudRoot.appendChild(div);
@@ -296,6 +376,7 @@ function _startHudLoop() {
 function _wireControlsOnce() {
   const btnWcs = document.getElementById("btnWcs");
   _updateWcsBtn(btnWcs);
+
   btnWcs?.addEventListener("click", () => {
     const p = _ensurePreviewState();
     p.showWcs = !p.showWcs;
@@ -369,16 +450,17 @@ function _wireKeysOnce() {
   );
 }
 
-// ------------------------------------------------------------
-// Public API
-// ------------------------------------------------------------
-export function viewerMount() {
-  const domGone =
-    !document.getElementById("viewerControls") ||
-    !document.getElementById("hudHost") ||
-    !document.getElementById("mifx-hud");
+export function viewerMount(onSetupChange = null) {
+  if (typeof onSetupChange === "function") {
+    _setupChangeHandler = onSetupChange;
+  }
 
-  if (domGone) _installed = false;
+  const setups = _getSetups();
+  if (!state.activeSetupId && setups.length) {
+    state.activeSetupId = setups[0].id;
+  }
+
+  _renderSidebar();
 
   const ok = _ensureViewportOverlay();
   if (!ok) return;
@@ -396,7 +478,6 @@ export function viewerMount() {
   _lastHudActivity = _now() - (HUD_IDLE_HIDE_MS - HUD_FORCE_SHOW_MS);
   _renderHud();
   _updateHudVisibility();
-
   viewerSyncPlaybackUi();
 }
 
@@ -426,6 +507,7 @@ export function viewerSelectOp(opId) {
   _updateHudVisibility();
 
   viewerSyncPlaybackUi();
+  _renderSidebar();
 
   const scrub = document.getElementById("pbScrub");
   if (scrub) scrub.value = "0";
