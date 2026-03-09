@@ -14,6 +14,7 @@ import {
   hudMount,
   hudBuildRows,
 } from "/src/render/three/features/hud.js";
+import { viewerTreeRender } from "/src/ui/features/viewer_tree.js";
 
 let _installed = false;
 let _keysInstalled = false;
@@ -39,16 +40,10 @@ function _touchHud() {
 
 function _ensurePreviewState() {
   const p = (state.preview ??= {});
-  if (typeof p.showWcs !== "boolean") p.showWcs = true;
-  if (typeof p.showAxes !== "boolean") p.showAxes = true;
+  if (typeof p.showWcs !== "boolean") p.showWcs = false;
+  if (typeof p.showAxes !== "boolean") p.showAxes = false;
   if (typeof p.showGrid !== "boolean") p.showGrid = false;
   return p;
-}
-
-function _ensureUiState() {
-  const ui = (state.ui ??= {});
-  if (typeof ui.showSetupCsys !== "boolean") ui.showSetupCsys = true;
-  return ui;
 }
 
 function _applyWcsToRenderer() {
@@ -60,23 +55,11 @@ function _applyWcsToRenderer() {
   });
 }
 
-function _applySetupCsysToRenderer() {
-  const ui = _ensureUiState();
-  state.renderer?.setSetupCsysVisible?.(ui.showSetupCsys);
-}
-
 function _updateWcsBtn(btn) {
   if (!btn) return;
   const p = _ensurePreviewState();
   btn.textContent = p.showWcs ? "WCS: ON" : "WCS: OFF";
   btn.style.opacity = p.showWcs ? "1" : "0.65";
-}
-
-function _updateSetupCsysBtn(btn) {
-  if (!btn) return;
-  const ui = _ensureUiState();
-  btn.textContent = ui.showSetupCsys ? "SETUP CSYS: ON" : "SETUP CSYS: OFF";
-  btn.style.opacity = ui.showSetupCsys ? "1" : "0.65";
 }
 
 function _setPlaybackUiEnabled(enabled) {
@@ -114,90 +97,12 @@ function _getSetups() {
   return Array.isArray(state.job?.setups) ? state.job.setups : [];
 }
 
-function _getViewerOps() {
-  return (state.operations || []).filter((op) => op.setupRef === state.activeSetupId);
-}
-
 function _renderSidebar() {
-  const host = document.getElementById("viewerSidebar");
-  if (!host) return;
-
-  const setups = _getSetups();
-  const ops = _getViewerOps();
-
-  host.innerHTML = `
-    <div style="margin-bottom:12px;">
-      <label for="viewerSetupSelect"><b>Setup</b></label>
-      <div style="margin-top:6px;">
-        <select id="viewerSetupSelect" style="width:100%;">
-          ${setups
-            .map(
-              (s) =>
-                `<option value="${String(s.id)}"${
-                  s.id === state.activeSetupId ? " selected" : ""
-                }>${s.name || s.id}</option>`
-            )
-            .join("")}
-        </select>
-      </div>
-    </div>
-
-    <div style="margin-bottom:8px;"><b>Operations</b></div>
-    <ul id="opList" style="padding-left:16px;margin-top:8px;"></ul>
-  `;
-
-  const select = document.getElementById("viewerSetupSelect");
-  if (select) {
-    select.addEventListener("change", async (e) => {
-      const newSetupId = e.target.value || null;
-      state.activeSetupId = newSetupId;
-
-      const setupOps = (state.operations || []).filter((op) => op.setupRef === newSetupId);
-      if (!setupOps.some((op) => op.id === state.activeOpId)) {
-        state.activeOpId = null;
-        state.renderer?.setActiveOperation?.(null);
-      }
-
-      _renderSidebar();
-      viewerSyncPlaybackUi();
-      _applySetupCsysToRenderer();
-
-      if (typeof _setupChangeHandler === "function") {
-        await _setupChangeHandler(newSetupId);
-      }
-    });
-  }
-
-  const list = document.getElementById("opList");
-  if (!list) return;
-
-  list.innerHTML = "";
-
-  for (const op of ops) {
-    const li = document.createElement("li");
-    li.textContent = op.name || op.id;
-    li.style.cursor = "pointer";
-    li.style.marginBottom = "4px";
-
-    if (state.activeOpId === op.id) {
-      li.style.fontWeight = "600";
-      li.style.color = "#ff5500";
-    }
-
-    li.addEventListener("click", () => {
-      viewerSelectOp(op.id);
-      _renderSidebar();
-    });
-
-    list.appendChild(li);
-  }
-
-  if (!ops.length) {
-    const empty = document.createElement("div");
-    empty.textContent = "No operations in this setup.";
-    empty.style.opacity = "0.7";
-    host.appendChild(empty);
-  }
+  viewerTreeRender({
+    hostId: "viewerSidebar",
+    onSetupChange: _setupChangeHandler,
+    onSelectOp: viewerSelectOp,
+  });
 }
 
 function _ensureViewportOverlay() {
@@ -273,7 +178,6 @@ function _ensureViewportOverlay() {
 
     bar.innerHTML = `
       <button id="btnWcs" title="Toggle WCS">WCS: ON</button>
-      <button id="btnSetupCsys" title="Toggle setup CSYS">SETUP CSYS: ON</button>
 
       <label style="display:flex;align-items:center;gap:6px;">
         View:
@@ -395,24 +299,14 @@ function _startHudLoop() {
 
 function _wireControlsOnce() {
   const btnWcs = document.getElementById("btnWcs");
-  const btnSetupCsys = document.getElementById("btnSetupCsys");
 
   _updateWcsBtn(btnWcs);
-  _updateSetupCsysBtn(btnSetupCsys);
 
   btnWcs?.addEventListener("click", () => {
     const p = _ensurePreviewState();
     p.showWcs = !p.showWcs;
     _updateWcsBtn(btnWcs);
     _applyWcsToRenderer();
-    _touchHud();
-  });
-
-  btnSetupCsys?.addEventListener("click", () => {
-    const ui = _ensureUiState();
-    ui.showSetupCsys = !ui.showSetupCsys;
-    _updateSetupCsysBtn(btnSetupCsys);
-    _applySetupCsysToRenderer();
     _touchHud();
   });
 
@@ -453,7 +347,6 @@ function _wireControlsOnce() {
   });
 
   _applyWcsToRenderer();
-  _applySetupCsysToRenderer();
 }
 
 function _wireKeysOnce() {
@@ -492,6 +385,11 @@ export function viewerMount(onSetupChange = null) {
     state.activeSetupId = setups[0].id;
   }
 
+  state.preview ??= {};
+  state.preview.showWcs = false;
+  state.preview.showAxes = false;
+  state.preview.showGrid = false;
+
   _renderSidebar();
 
   const ok = _ensureViewportOverlay();
@@ -502,15 +400,11 @@ export function viewerMount(onSetupChange = null) {
     _wireControlsOnce();
     _wireKeysOnce();
     _startHudLoop();
-  } else {
-    _applyWcsToRenderer();
-    _applySetupCsysToRenderer();
-    _updateWcsBtn(document.getElementById("btnWcs"));
-    _updateSetupCsysBtn(document.getElementById("btnSetupCsys"));
   }
 
-  _applySetupCsysToRenderer();
-  _updateSetupCsysBtn(document.getElementById("btnSetupCsys"));
+  _applyWcsToRenderer();
+
+  _updateWcsBtn(document.getElementById("btnWcs"));
 
   _lastHudActivity = _now() - (HUD_IDLE_HIDE_MS - HUD_FORCE_SHOW_MS);
   _renderHud();

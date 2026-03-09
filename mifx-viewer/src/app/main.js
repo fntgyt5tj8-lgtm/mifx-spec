@@ -57,12 +57,9 @@ async function refreshRendererForActiveSetup() {
   await state.renderer.loadToolpaths(opsForSetup, state.source);
 
   state.renderer.setActiveOperation?.(null);
-
-  // viewer overlay/hud may need a refresh after toolpaths/setup load
-  viewerMount();
 }
 
-async function ensureRendererMounted() {
+async function ensureRendererMounted(onSetupChange = null) {
   const viewport = document.getElementById("viewport");
   if (!viewport) throw new Error("Missing #viewport in UI (renderLoaded must create it)");
 
@@ -77,8 +74,8 @@ async function ensureRendererMounted() {
     state.renderer = new ThreeRenderer(viewport);
     await state.renderer.init();
 
-    // ✅ re-assert viewer-owned overlay after renderer creates canvas
-    viewerMount();
+    // re-assert viewer-owned overlay after renderer creates canvas
+    viewerMount(onSetupChange);
 
     const resize = () => {
       const r = state.renderer;
@@ -124,17 +121,23 @@ root.addEventListener("drop", async (e) => {
 
     state.activeOpId = null;
 
-    renderLoaded(root, async (newSetupId) => {
+    const handleSetupChange = async (newSetupId) => {
       state.activeSetupId = newSetupId;
 
-      await ensureRendererMounted();
+      await ensureRendererMounted(handleSetupChange);
       applyWcsFlagsToRenderer();
       await refreshRendererForActiveSetup();
-    });
 
-    await ensureRendererMounted();
+      // rerender tree/sidebar after async setup reload completes
+      viewerMount(handleSetupChange);
+    };
+
+    renderLoaded(root, handleSetupChange);
+
+    await ensureRendererMounted(handleSetupChange);
     applyWcsFlagsToRenderer();
     await refreshRendererForActiveSetup();
+    viewerMount(handleSetupChange);
   } catch (err) {
     console.error(err);
     alert(String(err?.message || err));

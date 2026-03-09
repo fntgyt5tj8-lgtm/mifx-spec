@@ -13,7 +13,6 @@ import { applyTransformRowsToObjectMM } from "/src/render/three/util/units.js";
 
 // HUD is now a viewer feature
 import {
-  hudMount,
   hudClear,
   hudRegisterTimeline,
   hudDestroy,
@@ -21,10 +20,10 @@ import {
 
 // Features
 import { installWcs } from "/src/render/three/features/world_csys.js";
-import { installMarker } from "/src/render/three/features/tools.js"; // ✅ renamed marker -> tools
+import { installMarker } from "/src/render/three/features/tools.js";
 import { installToolpaths } from "/src/render/three/features/toolpath.js";
 import { installOpCsys } from "/src/render/three/features/op_csys.js";
-import { installSetupCsys } from "/src/render/three/features/setup_csys.js";
+import { installArtifactCsys } from "/src/render/three/features/artifact_csys.js";
 import { installGeometry } from "/src/render/three/features/geometry.js";
 import { installViews } from "/src/render/three/features/views.js";
 import { installPicker } from "/src/render/three/features/picker.js";
@@ -81,19 +80,20 @@ function buildHudTimelineFromParsed({ timeline, motionPoints } = {}) {
 function _pickToolIdFromOp(op) {
   if (!op) return null;
 
-  // common patterns
   if (op.toolId != null) return op.toolId;
   if (op.toolRef != null) return op.toolRef;
 
-  // nested
   if (op.tool?.id != null) return op.tool.id;
   if (op.tool?.toolId != null) return op.tool.toolId;
   if (op.tool?.ref != null) return op.tool.ref;
 
-  // snake_case
   if (op.tool_id != null) return op.tool_id;
 
   return null;
+}
+
+function _artifactRootKey(setupId, role) {
+  return `${String(setupId || "")}:${String(role || "").trim().toLowerCase()}`;
 }
 
 // ------------------------------------------------------------
@@ -120,25 +120,27 @@ export class ThreeRenderer extends Renderer {
     this.views = null;
     this.geometry = null;
     this.picker = null;
-    this.marker = null; // tools.js instance
+    this.marker = null;
     this.toolpaths = null;
     this.opCsys = null;
-    this.setupCsys = null;
+    this.artifactCsys = null;
 
     // state
     this._activeSetupId = null;
-    this._showSetupCsys = true;
 
     // debug sentinel axes
     this.__debugAxes = null;
 
     // lookups
-    this._opById = new Map();   // opId -> op payload
-    this._toolById = new Map(); // toolId -> tool payload
+    this._opById = new Map();
+    this._toolById = new Map();
+
+    // setup artifact roots for model tree visibility
+    this._setupArtifactRootByKey = new Map();
   }
 
   // ------------------------------------------------------------
-  // Tools map plumbing (call from app after loadTools(source))
+  // Tools map plumbing
   // ------------------------------------------------------------
   setTools(tools = []) {
     this._toolById = new Map();
@@ -147,15 +149,11 @@ export class ThreeRenderer extends Renderer {
     for (const t of arr) {
       if (!t || typeof t !== "object") continue;
 
-      // Prefer explicit id if you set it in load_tools.js (tool.id = key)
       const id = t.id ?? t.toolId ?? t.uuid ?? t.key ?? null;
       if (id == null) continue;
 
       this._toolById.set(String(id), t);
     }
-
-    // optional: useful debug
-    // console.log("[renderer] setTools:", arr.length, "-> map size", this._toolById.size);
   }
 
   async init() {
@@ -165,7 +163,6 @@ export class ThreeRenderer extends Renderer {
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(45, w / h, 0.01, 1e9);
 
-    // Z-up CAM convention
     this.camera.up.set(0, 0, 1);
     this.camera.position.set(8, 6, 8);
     this.camera.lookAt(0, 0, 0);
@@ -174,14 +171,12 @@ export class ThreeRenderer extends Renderer {
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     this.renderer.setSize(w, h);
 
-    // do not wipe viewer overlay owned by viewer.js
     const oldCanvas = this.host.querySelector("canvas");
     if (oldCanvas && oldCanvas !== this.renderer.domElement) {
       oldCanvas.remove();
     }
     this.host.appendChild(this.renderer.domElement);
 
-    // HUD
     hudClear();
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
@@ -203,12 +198,10 @@ export class ThreeRenderer extends Renderer {
     this.scene.add(this.grpToolpaths);
     this.scene.add(this.grpHelpers);
 
-    // sentinel
     this.__debugAxes = _makeOnTopAxes(200);
     this.__debugAxes.name = "__debug_axes_sentinel";
     this.grpHelpers.add(this.__debugAxes);
 
-    // Install features
     const ctx = {
       THREE,
       host: this.host,
@@ -222,17 +215,14 @@ export class ThreeRenderer extends Renderer {
         helpers: this.grpHelpers,
       },
 
-      // fatline deps
       Line2,
       LineMaterial,
       LineGeometry,
 
-      // toolpath parsing + HUD timeline
       loadToolpathsForOps,
       buildHudTimelineFromParsed,
       hud: { hudClear, hudRegisterTimeline },
 
-      // WCS visibility state from base Renderer
       getWcsVisibility: () => this.getWcsVisibility(),
       getWcsBaseAxesLen: () => 120,
     };
@@ -248,20 +238,17 @@ export class ThreeRenderer extends Renderer {
     this.picker = installPicker(ctx);
     ctx.picker = this.picker;
 
-    // tools.js (marker + halo + cylinder)
     this.marker = installMarker(ctx);
     ctx.marker = this.marker;
 
-    // toolpaths drives marker pose + axis (inside toolpath.js)
     this.toolpaths = installToolpaths(ctx);
 
     this.opCsys = installOpCsys(ctx);
-    this.setupCsys = installSetupCsys(ctx);
+    this.artifactCsys = installArtifactCsys(ctx);
 
     this.wcs?.rebuild?.({ axesLen: 120, gridSize: 400 });
     this.setWcsVisibility(this.getWcsVisibility());
 
-    // Optional global hooks
     window.viewerSetView = (name) => this.setView?.(name);
     window.viewerResetView = () => this.resetView?.();
     window.viewerUnhideAll = () => this.unhideAll?.();
@@ -295,17 +282,16 @@ export class ThreeRenderer extends Renderer {
     this.geometry?.clear?.();
     this.picker?.clear?.();
     this.opCsys?.clear?.();
-    this.setupCsys?.clear?.();
+    this.artifactCsys?.clear?.();
     this._activeSetupId = null;
 
     this._opById = new Map();
+    this._setupArtifactRootByKey = new Map();
 
-    // re-add sentinel
     this.__debugAxes = _makeOnTopAxes(200);
     this.__debugAxes.name = "__debug_axes_sentinel";
     this.grpHelpers.add(this.__debugAxes);
 
-    // rebuild WCS after helpers reset
     this.wcs?.clear?.();
     this.wcs?.rebuild?.({ axesLen: 120, gridSize: 400 });
     this.setWcsVisibility(this.getWcsVisibility());
@@ -340,13 +326,13 @@ export class ThreeRenderer extends Renderer {
     this.marker = null;
     this.toolpaths = null;
     this.opCsys = null;
-    this.setupCsys = null;
+    this.artifactCsys = null;
 
     this.__debugAxes = null;
   }
 
   // ------------------------------------------------------------
-  // WCS visibility (called by UI)
+  // WCS visibility
   // ------------------------------------------------------------
   setWcsVisibility({ showWcs, showAxes, showGrid } = {}) {
     super.setWcsVisibility({ showWcs, showAxes, showGrid });
@@ -368,9 +354,11 @@ export class ThreeRenderer extends Renderer {
   setView(name) {
     this.views?.setView?.(name);
   }
+
   resetView() {
     this.views?.resetView?.();
   }
+
   frameAll() {
     this.views?.frameAll?.();
   }
@@ -383,12 +371,55 @@ export class ThreeRenderer extends Renderer {
   }
 
   // ------------------------------------------------------------
-  // Setup CSYS visibility
+  // Visibility API (model tree)
   // ------------------------------------------------------------
-  setSetupCsysVisible(visible) {
-    this._showSetupCsys = !!visible;
-    if (!this._activeSetupId) return;
-    this.setupCsys?.setVisible?.("setup", this._activeSetupId, this._showSetupCsys);
+  setSetupArtifactVisible(setupId, role, visible) {
+    const root = this._setupArtifactRootByKey.get(_artifactRootKey(setupId, role));
+    if (!root) return;
+    root.visible = !!visible;
+  }
+
+  setArtifactCsysVisible(setupId, role, visible) {
+    this.artifactCsys?.setVisible?.(setupId, role, visible);
+  }
+
+  setOperationToolpathVisible(opId, visible) {
+    this.toolpaths?.setOperationVisible?.(opId, visible);
+  }
+
+  setOperationCsysVisible(opId, visible) {
+    this.opCsys?.setVisible?.(opId, visible);
+  }
+
+  // ------------------------------------------------------------
+  // Setup helpers
+  // ------------------------------------------------------------
+  _getSetupArtifacts(setup) {
+    const arts = Array.isArray(setup?.artifacts) ? setup.artifacts : [];
+
+    return arts.filter(
+      (a) =>
+        a &&
+        typeof a === "object" &&
+        a.path &&
+        a.present !== false &&
+        (
+          a.role === "setup_geometry" ||
+          a.role === "part" ||
+          a.role === "stock" ||
+          a.role === "fixture"
+        )
+    );
+  }
+
+  _makeArtifactRoot(setupId, art) {
+    const role = String(art?.role || "artifact").trim().toLowerCase();
+    const root = new THREE.Group();
+    root.name = `artifact:${setupId}:${role}`;
+
+    applyTransformRowsToObjectMM(THREE, root, art?.transform);
+
+    return root;
   }
 
   // ------------------------------------------------------------
@@ -396,35 +427,35 @@ export class ThreeRenderer extends Renderer {
   // ------------------------------------------------------------
   async loadSetupGeometry(setup, source) {
     clearGroup(this.grpSetup);
-
-    const ar = setup?.artifactRef;
-    if (!ar?.path || ar.present === false) return;
+    this._setupArtifactRootByKey = new Map();
 
     const setupId = setup?.id || `set-${setup?.index ?? "?"}`;
+    const artifacts = this._getSetupArtifacts(setup);
+    if (!artifacts.length) return;
 
-    this.setupCsys?.registerGeometryRoot?.("setup", setupId, this.grpSetup);
-
-    if (this._activeSetupId && this._activeSetupId !== setupId) {
-      this.setupCsys?.setVisible?.("setup", this._activeSetupId, false);
-    }
     this._activeSetupId = setupId;
 
-    applyTransformRowsToObjectMM(THREE, this.grpSetup, setup?.transform);
+    // each artifact transform is absolute in WCS, so they are siblings
+    for (const art of artifacts) {
+      const role = String(art?.role || "").trim().toLowerCase();
+      const artifactRoot = this._makeArtifactRoot(setupId, art);
 
-    await this.geometry?.loadIntoGroup?.({
-      artifactRef: ar,
-      source,
-      group: this.grpSetup,
-      kind: "setup",
-      id: setupId,
-      unitsHint: setup?.transform?.unit,
-    });
+      this.grpSetup.add(artifactRoot);
+      this._setupArtifactRootByKey.set(_artifactRootKey(setupId, role), artifactRoot);
+
+      this.artifactCsys?.registerArtifactRoot?.(setupId, role, artifactRoot);
+
+      await this.geometry?.loadIntoGroup?.({
+        artifactRef: art,
+        source,
+        group: artifactRoot,
+        kind: "setup_artifact",
+        id: `${setupId}:${role}`,
+        unitsHint: art?.transform?.unit || null,
+      });
+    }
 
     this.picker?.setRoot?.(this.grpSetup);
-
-    if (this._showSetupCsys) {
-      this.setupCsys?.setVisible?.("setup", setupId, true);
-    }
 
     this.wcs?.autoScaleFromScene?.();
     this.frameAll();
@@ -462,7 +493,7 @@ export class ThreeRenderer extends Renderer {
   }
 
   // ------------------------------------------------------------
-  // Selection drives: toolpaths + tool cylinder (payload)
+  // Selection drives: toolpaths + tool cylinder
   // ------------------------------------------------------------
   setActiveOperation(opId) {
     const id = opId ?? null;
@@ -480,7 +511,6 @@ export class ThreeRenderer extends Renderer {
     const toolId = _pickToolIdFromOp(op);
 
     if (!toolId) {
-      // no tool reference => fallback marker/halo only
       this.marker?.clearTool?.();
       this.setPlayback({ opId: id, playing: false, stepIndex: 0 });
       return;
@@ -488,16 +518,12 @@ export class ThreeRenderer extends Renderer {
 
     const tool = this._toolById.get(String(toolId)) || null;
     if (!tool) {
-      // tool map not loaded OR id mismatch => fallback
       this.marker?.clearTool?.();
       this.setPlayback({ opId: id, playing: false, stepIndex: 0 });
       return;
     }
 
-    // ✅ build cylinder from payload (tools.js must implement setToolFromPayload)
     this.marker?.setToolFromPayload?.(tool, { unitsLinear: "mm" });
-
-    // show first step (moves tool + applies axis if toolpath provides it)
     this.setPlayback({ opId: id, playing: false, stepIndex: 0 });
   }
 }

@@ -21,6 +21,7 @@ export async function loadPackage(source) {
   state.tools = await loadTools(source);
 
   state.job = job;
+  state.setups = job.setups;
   state.operations = job.operations;
 
   state.renderer?.setTools?.(state.tools);
@@ -32,5 +33,14 @@ export async function loadPackage(source) {
     count: state.operations.length,
     withArtifactRef: state.operations.filter((o) => !!o.artifactRef?.path).length,
     withWorkplane: state.operations.filter((o) => !!o.workplane?.rows).length,
+  });
+
+  console.log("[actions] loaded setups", {
+    count: state.setups?.length || 0,
+    setupIds: (state.setups || []).map((s) => s?.id),
+    artifactCounts: (state.setups || []).map((s) => ({
+      id: s?.id,
+      artifacts: Array.isArray(s?.artifacts) ? s.artifacts.length : 0,
+    })),
   });
 }

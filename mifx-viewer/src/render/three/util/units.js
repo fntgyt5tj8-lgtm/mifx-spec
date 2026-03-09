@@ -13,10 +13,6 @@ export function scaleToMM(unit) {
   return normUnit(unit) === "IN" ? 25.4 : 1.0;
 }
 
-/**
- * Convert a point-like object (x,y,z) from JSON units -> scene mm.
- * Safe for missing/invalid values.
- */
 export function vec3ToMM(p, unit) {
   const s = scaleToMM(unit);
   const x = Number(p?.x), y = Number(p?.y), z = Number(p?.z);
@@ -27,14 +23,6 @@ export function vec3ToMM(p, unit) {
   };
 }
 
-/**
- * Build a THREE.Matrix4 from row-major 4x4 "rows" and convert translation
- * into scene mm according to the provided unit.
- *
- * - Rotation/orientation is preserved
- * - Translation is scaled (IN->MM)
- * - Any embedded scale remains as-is (we generally avoid scale in transforms)
- */
 export function matrixFromRowsToSceneMM(THREE, rows4x4, unit) {
   if (!THREE) throw new Error("matrixFromRowsToSceneMM: THREE is required");
 
@@ -52,7 +40,6 @@ export function matrixFromRowsToSceneMM(THREE, rows4x4, unit) {
 
   const s = scaleToMM(unit);
   if (s !== 1.0) {
-    // safest way (THREE stores internal elements column-major)
     const t = new THREE.Vector3();
     const q = new THREE.Quaternion();
     const sc = new THREE.Vector3();
@@ -65,10 +52,6 @@ export function matrixFromRowsToSceneMM(THREE, rows4x4, unit) {
   return m;
 }
 
-/**
- * Convenience: apply a unit-aware transform (rows + unit) to an Object3D.
- * Object will use matrixAutoUpdate=false.
- */
 export function applyTransformRowsToObjectMM(THREE, obj3d, transform) {
   if (!obj3d) return;
 
@@ -76,7 +59,6 @@ export function applyTransformRowsToObjectMM(THREE, obj3d, transform) {
   const unit = transform?.unit;
 
   if (!Array.isArray(rows) || rows.length !== 4) {
-    // fallback to auto updates (identity)
     obj3d.matrixAutoUpdate = true;
     return;
   }
@@ -84,4 +66,5 @@ export function applyTransformRowsToObjectMM(THREE, obj3d, transform) {
   const m = matrixFromRowsToSceneMM(THREE, rows, unit);
   obj3d.matrixAutoUpdate = false;
   obj3d.matrix.copy(m);
+  obj3d.matrixWorldNeedsUpdate = true;
 }

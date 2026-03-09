@@ -173,6 +173,9 @@ export function installToolpaths(ctx) {
     byOp: new Map(),
   };
 
+  // explicit per-op visibility for model tree
+  const visibilityByOp = new Map();
+
   function _clearGroup(group) {
     if (!group) return;
     for (let i = group.children.length - 1; i >= 0; i--) {
@@ -190,9 +193,15 @@ export function installToolpaths(ctx) {
 
   function _applySelectionVisibility() {
     const active = play?.opId || null;
+
     for (const child of grpToolpaths.children) {
       const id = child.userData?.opId;
-      child.visible = active ? id === active : false;
+      const visibleByToggle =
+        typeof visibilityByOp.get(String(id || "")) === "boolean"
+          ? visibilityByOp.get(String(id || ""))
+          : true;
+
+      child.visible = !!visibleByToggle && (!!active ? id === active : false);
     }
   }
 
@@ -226,6 +235,7 @@ export function installToolpaths(ctx) {
     play.pose = null;
 
     fatLines = [];
+    visibilityByOp.clear();
 
     marker?.clearTool?.();
     marker?.hide?.();
@@ -242,6 +252,7 @@ export function installToolpaths(ctx) {
     _clearGroup(grpToolpaths);
     play.byOp = new Map();
     fatLines = [];
+    visibilityByOp.clear();
 
     play.opId = null;
     play.playing = false;
@@ -266,6 +277,8 @@ export function installToolpaths(ctx) {
     for (const op of ops) {
       const parsed = parsedMap.get(op.id);
       if (!parsed) continue;
+
+      visibilityByOp.set(String(op.id), true);
 
       const motionPoints = Array.isArray(parsed.motionPoints) ? parsed.motionPoints : [];
       const renderPts =
@@ -451,6 +464,12 @@ export function installToolpaths(ctx) {
     setPlayback({ opId: active, playing: false, stepIndex: 0 });
   }
 
+  function setOperationVisible(opId, visible) {
+    const k = String(opId || "");
+    visibilityByOp.set(k, !!visible);
+    _applySelectionVisibility();
+  }
+
   return {
     load,
     clear,
@@ -459,6 +478,7 @@ export function installToolpaths(ctx) {
     getPlaybackPose,
     setPlayback,
     setActiveOperation,
-    _state: { play },
+    setOperationVisible,
+    _state: { play, visibilityByOp },
   };
 }
