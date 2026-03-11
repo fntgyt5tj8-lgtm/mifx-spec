@@ -1,5 +1,5 @@
 # Fdb version 4
-["pdflatex"] 1773269366.11857 "/Users/azlanhadi/mifx-spec/spec/mifx-latex/main.tex" "main.pdf" "main" 1773269366.67021 0
+["pdflatex"] 1773270840.54364 "/Users/azlanhadi/mifx-spec/spec/mifx-latex/main.tex" "main.pdf" "main" 1773270841.11548 0
   "/Users/azlanhadi/mifx-spec/spec/mifx-latex/main.tex" 1773269365.33643 1191 bb3150f8450e2a88c80cc5aab3343231 ""
   "/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc" 1254269338 2375 baa924870cfb487815765f9094cf3728 ""
   "/usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc" 1254269338 3031 6c4d3515bf7115d8518af1c9ab97ca44 ""
@@ -170,11 +170,11 @@
   "/usr/local/texlive/2025/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1767369820 5467155 19efa205003f9ecad95fbbaa6ff24da1 ""
   "/usr/local/texlive/2025/texmf-var/web2c/pdftex/pdflatex.fmt" 1767369767 3345737 ebd8948a0d047fd66c3e4fcc4c9f9d07 ""
   "/usr/local/texlive/2025/texmf.cnf" 1741450484 577 418a7058ec8e006d8704f60ecd22c938 ""
-  "main.aux" 1773269366.616 10197 de342fbdf015ea313e13dc1b400a3142 "pdflatex"
-  "main.out" 1773269366.61704 11330 be0abd9d95490b90358e2d3ffa3ec3df "pdflatex"
+  "main.aux" 1773270841.05879 10197 de342fbdf015ea313e13dc1b400a3142 "pdflatex"
+  "main.out" 1773270841.05968 11330 be0abd9d95490b90358e2d3ffa3ec3df "pdflatex"
   "main.tex" 1773269365.33643 1191 bb3150f8450e2a88c80cc5aab3343231 ""
-  "main.toc" 1773269366.61731 6672 64b79d89cd56dd1418620adc980fd99c "pdflatex"
-  "metadata.tex" 1772107487.39797 145 7c563b8b3e807f85270ec08d5717c68d ""
+  "main.toc" 1773270841.05992 6672 64b79d89cd56dd1418620adc980fd99c "pdflatex"
+  "metadata.tex" 1773270840.36257 145 2c7439b14a61490d1e45c45c2d904b35 ""
   "preamble.tex" 1773264900.47028 1266 79ff5a3938bdef2331bc3e97001f7d99 ""
   "sections/01_Introduction.tex" 1773264460.05396 1548 9e043f02cca21e7e4e6876c17d0f5c36 ""
   "sections/02_MIFX Package.tex" 1773264820.06523 1553 3081f0f765ea3b7eb1b65212e72c5247 ""
