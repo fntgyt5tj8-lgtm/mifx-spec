@@ -1,0 +1,35 @@
+\section{Tool Definition Example}
+
+The following example defines a bull mill mounted in a 45 degree angle head.
+
+\begin{verbatim}
+{
+  "id": "7",
+  "unit": "in",
+  "description": "1/2 Bull Mill mounted in 45° angle head",
+
+  "profile": {
+    "kind": "revolved",
+    "segments": [
+      { "type": "line", "z": 0.0, "r": 0.25 },
+      { "type": "arc", "z": -0.03, "r": 0.22, "radius": 0.03 },
+      { "type": "line", "z": -1.2, "r": 0.22 }
+    ]
+  },
+
+  "mount": {
+    "kind": "angle_head",
+    "description": "BIG KAISER 45° head"
+  },
+
+  "controls": [
+    {
+      "id": "h7",
+      "kind": "length_offset",
+      "offsetNumber": 7,
+      "frame": "tool",
+      "point": { "x": 0, "y": 0, "z": 3.0, "unit": "in" }
+    }
+  ]
+}
+\end{verbatim}

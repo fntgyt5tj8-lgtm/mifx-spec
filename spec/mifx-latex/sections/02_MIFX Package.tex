@@ -1,0 +1,59 @@
+\section{MIFX Package}
+
+A MIFX file is a self-contained archive containing machining process data and associated resources.
+
+The archive uses the file extension:
+
+\begin{verbatim}
+.mifx
+\end{verbatim}
+
+A MIFX package is a standard ZIP archive containing a structured filesystem layout.
+
+\subsection{Entry Point}
+
+The root of every MIFX package must contain a file named:
+
+\begin{verbatim}
+job.json
+\end{verbatim}
+
+The \texttt{job.json} file acts as the entry point of the package and defines the primary structure of the machining job.
+
+Software reading a MIFX package must begin interpretation from this file.
+
+\subsection{Filesystem Organization}
+
+The contents of a MIFX package are organized into directories representing different aspects of the machining process.
+
+A typical package structure is shown below:
+
+\begin{verbatim}
+job.mifx
+|
+|-- job.json
+|
+|-- setups/
+|   `-- set-1/
+|       |-- setup.json
+|       `-- operations/
+|           |-- op-1.json
+|           `-- op-2.json
+|
+|-- tools/
+|-- geometry/
+|-- in_process/
+`-- addons/
+\end{verbatim}
+
+Each directory contains objects and resources associated with the machining job.
+
+The structure is designed to remain human-readable while allowing software systems to efficiently navigate the package.
+
+\subsection{Portability}
+
+A MIFX package is intended to be portable between systems without modification.
+
+All files required to interpret the machining job should be included within the archive.
+
+External references are discouraged to ensure long-term integrity and reproducibility of the data.

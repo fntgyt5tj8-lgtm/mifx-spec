@@ -1,0 +1,137 @@
+\section{Tool Object}
+
+A Tool object describes a cutting tool used by machining operations within a MIFX package.
+
+Tools are defined independently from operations and may be referenced by multiple operations throughout the machining process.
+
+Tool objects are stored within the \texttt{tools} directory and may be organized into tool groups.
+
+Example location:
+
+\begin{verbatim}
+tools/main/7.json
+\end{verbatim}
+
+\subsection{Tool Structure}
+
+A Tool object typically contains:
+
+\begin{itemize}
+\item a tool identifier
+\item optional descriptive metadata
+\item artifact references describing tool properties
+\end{itemize}
+
+Example:
+
+\begin{verbatim}
+{
+  "id": "7",
+  "unit": "in",
+  "description": "1/2 Bull Mill",
+
+  "artifacts": [
+    {
+      "role": "tool_profile",
+      "kind": "json",
+      "path": "profiles/7.json",
+      "present": true
+    },
+    {
+      "role": "tool_controls",
+      "kind": "json",
+      "path": "controls/7.json",
+      "present": true
+    }
+  ]
+}
+\end{verbatim}
+
+\subsection{Tool Identifier}
+
+Each tool must define an identifier using the \texttt{id} field.
+
+Example:
+
+\begin{verbatim}
+"id": "7"
+\end{verbatim}
+
+The identifier is used by operations to reference the tool.
+
+\subsection{Tool Artifacts}
+
+Tool properties are defined through artifacts that reference additional resources.
+
+Common tool artifacts include:
+
+\begin{itemize}
+\item tool profile definitions
+\item tool mounting configuration
+\item control point definitions
+\item optional geometry meshes
+\item optional extensions
+\end{itemize}
+
+These resources are stored as separate files within the tool group directory.
+
+\subsection{Tool Profile}
+
+Tool profiles describe the geometric shape of the cutting tool.
+
+Profiles may be defined using parametric descriptions or geometry files.
+
+Examples include:
+
+\begin{itemize}
+\item revolved profiles
+\item line and arc segment definitions
+\item mesh representations
+\end{itemize}
+
+Profile definitions are typically stored as JSON objects referenced by the tool.
+
+\subsection{Tool Mount}
+
+Tools may optionally define mounting configurations describing how the tool is oriented relative to the machine spindle.
+
+Mount definitions may include transformation matrices representing angle heads or other mounting devices.
+
+Example artifact:
+
+\begin{verbatim}
+{
+  "role": "tool_mount",
+  "kind": "json",
+  "path": "mounts/7.json",
+  "present": true
+}
+\end{verbatim}
+
+\subsection{Tool Controls}
+
+Tool controls describe control system references associated with the tool.
+
+Examples include:
+
+\begin{itemize}
+\item length offsets
+\item diameter offsets
+\item control points used by the machining process
+\end{itemize}
+
+These values may correspond to controller parameters such as tool length compensation.
+
+\subsection{Tool Extensions}
+
+Additional tool information may be provided using extension artifacts.
+
+Examples may include:
+
+\begin{itemize}
+\item holder descriptions
+\item vendor information
+\item tooling system identifiers
+\end{itemize}
+
+Implementations should ignore extensions they do not recognize.

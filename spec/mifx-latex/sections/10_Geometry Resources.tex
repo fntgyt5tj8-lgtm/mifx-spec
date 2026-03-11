@@ -1,0 +1,134 @@
+\section{Geometry Resources}
+
+Geometry resources represent the physical objects involved in the machining process.
+
+These may include:
+
+\begin{itemize}
+\item part models
+\item stock material
+\item fixtures
+\item setup assemblies
+\end{itemize}
+
+Geometry resources are stored within the \texttt{geometry} directory of the MIFX package.
+
+Example structure:
+
+\begin{verbatim}
+geometry/
+  setups/
+  parts/
+  stock/
+  fixtures/
+\end{verbatim}
+
+The specification does not require all geometry directories to be present.
+
+\subsection{Geometry Referencing}
+
+Geometry resources are referenced through artifact objects contained within MIFX objects such as setups or in-process objects.
+
+Example:
+
+\begin{verbatim}
+{
+  "role": "setup_geometry",
+  "kind": "3mf",
+  "path": "geometry/setups/set-1.3mf",
+  "present": true
+}
+\end{verbatim}
+
+The \texttt{path} field references the location of the geometry file within the MIFX package.
+
+\subsection{Supported Geometry Formats}
+
+The MIFX specification does not mandate a single geometry format.
+
+Common formats include:
+
+\begin{itemize}
+\item STL
+\item 3MF
+\item STEP
+\item OBJ
+\end{itemize}
+
+Implementations may support additional formats depending on their capabilities.
+
+\subsection{Setup Assemblies}
+
+Setup assemblies represent the full machining configuration for a setup.
+
+These assemblies may include:
+
+\begin{itemize}
+\item part models
+\item stock material
+\item fixtures
+\item workholding
+\end{itemize}
+
+Assemblies are typically stored in the \texttt{geometry/setups} directory.
+
+Example:
+
+\begin{verbatim}
+geometry/setups/set-1.3mf
+\end{verbatim}
+
+\subsection{Part Geometry}
+
+Part models represent the design geometry of the component being manufactured.
+
+Part geometry is typically stored in the \texttt{geometry/parts} directory.
+
+Example:
+
+\begin{verbatim}
+geometry/parts/bracket.step
+\end{verbatim}
+
+\subsection{Stock Geometry}
+
+Stock geometry describes the initial material from which the part will be machined.
+
+Stock models are typically stored in the \texttt{geometry/stock} directory.
+
+Example:
+
+\begin{verbatim}
+geometry/stock/block.stl
+\end{verbatim}
+
+\subsection{Fixture Geometry}
+
+Fixture models represent workholding or machine fixtures used during machining.
+
+Fixture geometry is typically stored in the \texttt{geometry/fixtures} directory.
+
+Example:
+
+\begin{verbatim}
+geometry/fixtures/vise.step
+\end{verbatim}
+
+\subsection{Tool Geometry}
+
+Tool geometry is not stored in the \texttt{geometry} directory.
+
+Tool definitions, including optional geometry meshes or parametric profiles, are stored within the \texttt{tools} directory as part of the Tool object.
+
+\subsection{In-Process Geometry}
+
+Intermediate workpiece states are represented by In-Process objects.
+
+Associated geometry resources are stored alongside the in-process object within the \texttt{in\_process} directory.
+
+Example:
+
+\begin{verbatim}
+in_process/op1-5.json
+in_process/op1-5.stl
+\end{verbatim}

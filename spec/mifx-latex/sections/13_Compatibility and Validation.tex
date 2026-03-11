@@ -1,0 +1,43 @@
+\section{Compatibility and Forward Evolution}
+
+The MIFX specification is designed to support long-term compatibility across different systems and versions.
+
+Implementations should follow the compatibility principles described in this section.
+
+\subsection{Unknown Fields}
+
+MIFX consumers must ignore JSON fields they do not recognize.
+
+This allows new properties to be introduced without breaking existing implementations.
+
+\subsection{Unknown Objects}
+
+Systems encountering unknown objects or directories should ignore them unless they are required for core processing.
+
+This enables future extensions of the format.
+
+\subsection{Extensions and Addons}
+
+Extensions and addons allow systems to attach additional information to MIFX objects without modifying the core structure.
+
+Unknown extensions must not prevent a system from processing the package.
+
+\subsection{Version Identification}
+
+Each MIFX package declares its specification version using the \texttt{mifxVersion} field located in \texttt{job.json}.
+
+Example:
+
+\begin{verbatim}
+"mifxVersion": "0.1"
+\end{verbatim}
+
+Consumers may use this value to determine compatibility with the package structure.
+
+\subsection{Backward Compatibility}
+
+Future revisions of the MIFX specification should preserve the ability to interpret earlier versions whenever possible.
+
+Changes that would invalidate existing packages should be avoided.
+
+This principle ensures the long-term stability of the MIFX ecosystem.

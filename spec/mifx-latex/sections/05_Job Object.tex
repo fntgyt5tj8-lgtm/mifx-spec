@@ -1,0 +1,136 @@
+\section{Job Object}
+
+The Job object represents the root of a MIFX package.
+
+It provides the entry point for interpreting the machining process and defines the primary structure of the package.
+
+The Job object is stored in the file:
+
+\begin{verbatim}
+job.json
+\end{verbatim}
+
+located at the root of the MIFX archive.
+
+\subsection{Job Structure}
+
+A Job object typically contains:
+
+\begin{itemize}
+\item package metadata
+\item setup references
+\item tool group references
+\item optional addon references
+\end{itemize}
+
+Example:
+
+\begin{verbatim}
+{
+  "mifxVersion": "0.1",
+
+  "header": {
+    "export": {
+      "id": "d347ed61-2e99-4b69-8946-fcba14292330",
+      "at": "2026-03-11T19:03:24Z",
+      "by": "Fusion360",
+      "exporter": "MIFXExporter"
+    },
+    "job": {
+      "name": "3+2-Milling v5"
+    }
+  },
+
+  "setups": [
+    {
+      "id": "set-1",
+      "path": "setups/set-1/setup.json"
+    }
+  ],
+
+  "tools": [
+    {
+      "role": "tool_group",
+      "kind": "json",
+      "path": "tools/main.json",
+      "present": true
+    }
+  ]
+}
+\end{verbatim}
+
+\subsection{MIFX Version}
+
+The \texttt{mifxVersion} field specifies the version of the MIFX specification used to create the package.
+
+Example:
+
+\begin{verbatim}
+"mifxVersion": "0.1"
+\end{verbatim}
+
+Software implementations should verify compatibility before processing the package.
+
+\subsection{Header}
+
+The \texttt{header} object provides metadata describing the origin of the package.
+
+Typical information may include:
+
+\begin{itemize}
+\item exporting system
+\item export timestamp
+\item source design document
+\item job name
+\end{itemize}
+
+The structure of the header is intentionally flexible and may vary between implementations.
+
+\subsection{Setup References}
+
+The \texttt{setups} array lists the setups contained in the package.
+
+Each entry contains:
+
+\begin{itemize}
+\item the setup identifier
+\item the relative path to the setup object
+\end{itemize}
+
+Example:
+
+\begin{verbatim}
+{
+  "id": "set-1",
+  "path": "setups/set-1/setup.json"
+}
+\end{verbatim}
+
+The order of setups in this array represents the logical order of setups in the machining process.
+
+\subsection{Tool Groups}
+
+Tool definitions are organized into tool groups located in the \texttt{tools} directory.
+
+The Job object references tool groups through artifacts.
+
+Example:
+
+\begin{verbatim}
+{
+  "role": "tool_group",
+  "kind": "json",
+  "path": "tools/main.json",
+  "present": true
+}
+\end{verbatim}
+
+Tool groups allow multiple machine configurations (such as milling spindles or lathe turrets) to be represented within the same job.
+
+\subsection{Optional Addons}
+
+The Job object may reference optional addon definitions that extend the package with additional functionality.
+
+Addons are typically stored in the \texttt{addons} directory.
+
+Implementations should ignore addon definitions they do not recognize.

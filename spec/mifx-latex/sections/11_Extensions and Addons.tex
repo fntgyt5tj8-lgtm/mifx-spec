@@ -1,0 +1,90 @@
+\section{Extensions and Addons}
+
+MIFX allows additional information to be attached to objects through extensions and addons.
+
+This mechanism enables organizations and software vendors to extend the format without modifying the core specification.
+
+Systems that do not recognize an extension or addon must ignore it and continue processing the MIFX package.
+
+\subsection{Extensions}
+
+Extensions provide additional metadata attached directly to an object.
+
+Extensions are embedded within the JSON object using the \texttt{extensions} field.
+
+Example:
+
+\begin{verbatim}
+{
+  "id": "op-2",
+  "kind": "mill",
+  "name": "Face1",
+
+  "extensions": {
+    "tolerance": {
+      "value": 0.0004,
+      "level": "system"
+    },
+    "contour_tolerance": {
+      "value": 0.0002,
+      "level": "system"
+    }
+  }
+}
+\end{verbatim}
+
+Extensions may contain any JSON structure.
+
+The meaning of extension fields is defined by the producing system.
+
+Implementations that do not understand an extension must ignore it.
+
+\subsection{Addons}
+
+Addons provide larger or more structured extensions stored as separate JSON resources.
+
+Addons are placed inside the \texttt{addons} directory associated with a specific object.
+
+Example structure:
+
+\begin{verbatim}
+setups/
+  set-1/
+    addons/
+      setup-addon-1.json
+
+    operations/
+      addons/
+        op-1.json
+        op-2.json
+\end{verbatim}
+
+Addons allow complex extensions to be attached without modifying the base object structure.
+
+\subsection{Addon Referencing}
+
+Addons are implicitly associated with the object directory in which they reside.
+
+For example:
+
+\begin{verbatim}
+setups/set-1/addons/setup-addon-1.json
+\end{verbatim}
+
+indicates an addon attached to setup \texttt{set-1}.
+
+Similarly:
+
+\begin{verbatim}
+setups/set-1/operations/addons/op-2.json
+\end{verbatim}
+
+represents an addon attached to operation \texttt{op-2}.
+
+\subsection{Extension Safety}
+
+Extensions and addons must not alter the interpretation of the core MIFX objects.
+
+Systems must remain able to process the MIFX package even when unknown extensions are present.
+
+This ensures that MIFX remains forward-compatible and vendor-neutral.

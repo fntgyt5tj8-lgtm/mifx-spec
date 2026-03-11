@@ -1,0 +1,86 @@
+\section{Artifact System}
+
+Artifacts provide a mechanism for objects to reference additional data within a MIFX package.
+
+An artifact describes the relationship between an object and an associated resource such as a toolpath file, geometry file, or auxiliary JSON payload.
+
+Artifacts allow objects to remain lightweight while linking to external data stored elsewhere in the package.
+
+\subsection{Artifact Structure}
+
+Artifacts are defined as objects within an \texttt{artifacts} array.
+
+Example:
+
+\begin{verbatim}
+{
+  "role": "toolpath",
+  "kind": "apt",
+  "path": "cldata/op-2.apt",
+  "present": true
+}
+\end{verbatim}
+
+Each artifact contains the following fields:
+
+\begin{itemize}
+\item \textbf{role} — describes the semantic purpose of the artifact
+\item \textbf{kind} — describes the format or data type of the artifact
+\item \textbf{path} — relative file path to the referenced resource
+\item \textbf{present} — indicates whether the referenced resource is included in the package
+\end{itemize}
+
+\subsection{Artifact Roles}
+
+The \texttt{role} field defines how the referenced resource should be interpreted.
+
+Examples of artifact roles include:
+
+\begin{itemize}
+\item \texttt{toolpath}
+\item \texttt{tool}
+\item \texttt{operation\_csys}
+\item \texttt{setup\_geometry}
+\item \texttt{tool\_profile}
+\item \texttt{in\_process\_mesh}
+\end{itemize}
+
+The specification does not restrict artifact roles to a fixed list.
+
+Software implementations should ignore roles they do not recognize.
+
+\subsection{Artifact Kinds}
+
+The \texttt{kind} field describes the data format of the referenced resource.
+
+Examples include:
+
+\begin{itemize}
+\item \texttt{json}
+\item \texttt{apt}
+\item \texttt{stl}
+\item \texttt{3mf}
+\item \texttt{step}
+\end{itemize}
+
+Implementations may support additional formats depending on their capabilities.
+
+\subsection{Relative Paths}
+
+Artifact paths are specified using relative paths within the package.
+
+This ensures that the entire MIFX archive remains self-contained and portable.
+
+Example:
+
+\begin{verbatim}
+"path": "../../tools/main/2.json"
+\end{verbatim}
+
+\subsection{Optional Artifacts}
+
+The \texttt{present} field indicates whether the referenced resource exists in the package.
+
+This allows a MIFX file to declare resources that may be generated or supplied later by other systems.
+
+Software implementations should handle missing artifacts gracefully.

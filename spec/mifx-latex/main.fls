@@ -308,61 +308,96 @@ INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/lm/ts1lmr.fd
 INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/lm/ts1lmr.fd
 INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/lm/ts1lmr.fd
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/lm/ts1-lmr10.tfm
+INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/lm/ec-lmri10.tfm
+INPUT /usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc
+INPUT ./sections/02_MIFX Package.tex
+INPUT ./sections/02_MIFX Package.tex
+INPUT ./sections/02_MIFX Package.tex
+INPUT ./sections/02_MIFX Package.tex
+INPUT sections/02_MIFX Package.tex
 INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/lm/t1lmtt.fd
 INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/lm/t1lmtt.fd
 INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/lm/t1lmtt.fd
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/lm/ec-lmtt10.tfm
-INPUT /usr/local/texlive/2025/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc
-INPUT ./sections/02_Philosophy and Scope Statement.tex
-INPUT ./sections/02_Philosophy and Scope Statement.tex
-INPUT ./sections/02_Philosophy and Scope Statement.tex
-INPUT ./sections/02_Philosophy and Scope Statement.tex
-INPUT sections/02_Philosophy and Scope Statement.tex
-INPUT ./sections/03_Design Principles.tex
-INPUT ./sections/03_Design Principles.tex
-INPUT ./sections/03_Design Principles.tex
-INPUT ./sections/03_Design Principles.tex
-INPUT sections/03_Design Principles.tex
-INPUT ./sections/04_Core Concepts.tex
-INPUT ./sections/04_Core Concepts.tex
-INPUT ./sections/04_Core Concepts.tex
-INPUT ./sections/04_Core Concepts.tex
-INPUT sections/04_Core Concepts.tex
-INPUT ./sections/05_MIFX Core Data Model.tex
-INPUT ./sections/05_MIFX Core Data Model.tex
-INPUT ./sections/05_MIFX Core Data Model.tex
-INPUT ./sections/05_MIFX Core Data Model.tex
-INPUT sections/05_MIFX Core Data Model.tex
-INPUT ./sections/06_MIFX Job Package.tex
-INPUT ./sections/06_MIFX Job Package.tex
-INPUT ./sections/06_MIFX Job Package.tex
-INPUT ./sections/06_MIFX Job Package.tex
-INPUT sections/06_MIFX Job Package.tex
-INPUT ./sections/07_Conformance Levels.tex
-INPUT ./sections/07_Conformance Levels.tex
-INPUT ./sections/07_Conformance Levels.tex
-INPUT ./sections/07_Conformance Levels.tex
-INPUT sections/07_Conformance Levels.tex
-INPUT ./sections/08_Determinism and Long-Term Readability.tex
-INPUT ./sections/08_Determinism and Long-Term Readability.tex
-INPUT ./sections/08_Determinism and Long-Term Readability.tex
-INPUT ./sections/08_Determinism and Long-Term Readability.tex
-INPUT sections/08_Determinism and Long-Term Readability.tex
-INPUT ./sections/09_Non-Goals and Explicit Exclusions.tex
-INPUT ./sections/09_Non-Goals and Explicit Exclusions.tex
-INPUT ./sections/09_Non-Goals and Explicit Exclusions.tex
-INPUT ./sections/09_Non-Goals and Explicit Exclusions.tex
-INPUT sections/09_Non-Goals and Explicit Exclusions.tex
-INPUT ./sections/10_Governance Model.tex
-INPUT ./sections/10_Governance Model.tex
-INPUT ./sections/10_Governance Model.tex
-INPUT ./sections/10_Governance Model.tex
-INPUT sections/10_Governance Model.tex
-INPUT ./sections/11_Extension Policy.tex
-INPUT ./sections/11_Extension Policy.tex
-INPUT ./sections/11_Extension Policy.tex
-INPUT ./sections/11_Extension Policy.tex
-INPUT sections/11_Extension Policy.tex
+INPUT ./sections/03_Object Model.tex
+INPUT ./sections/03_Object Model.tex
+INPUT ./sections/03_Object Model.tex
+INPUT ./sections/03_Object Model.tex
+INPUT sections/03_Object Model.tex
+INPUT ./sections/04_Artifact System.tex
+INPUT ./sections/04_Artifact System.tex
+INPUT ./sections/04_Artifact System.tex
+INPUT ./sections/04_Artifact System.tex
+INPUT sections/04_Artifact System.tex
+INPUT ./sections/05_Job Object.tex
+INPUT ./sections/05_Job Object.tex
+INPUT ./sections/05_Job Object.tex
+INPUT ./sections/05_Job Object.tex
+INPUT sections/05_Job Object.tex
+INPUT ./sections/06_Setup Object.tex
+INPUT ./sections/06_Setup Object.tex
+INPUT ./sections/06_Setup Object.tex
+INPUT ./sections/06_Setup Object.tex
+INPUT sections/06_Setup Object.tex
+INPUT ./sections/07_Operation Object.tex
+INPUT ./sections/07_Operation Object.tex
+INPUT ./sections/07_Operation Object.tex
+INPUT ./sections/07_Operation Object.tex
+INPUT sections/07_Operation Object.tex
+INPUT ./sections/08_Tool Object.tex
+INPUT ./sections/08_Tool Object.tex
+INPUT ./sections/08_Tool Object.tex
+INPUT ./sections/08_Tool Object.tex
+INPUT sections/08_Tool Object.tex
+INPUT ./sections/09_In-Process Object.tex
+INPUT ./sections/09_In-Process Object.tex
+INPUT ./sections/09_In-Process Object.tex
+INPUT ./sections/09_In-Process Object.tex
+INPUT sections/09_In-Process Object.tex
+INPUT ./sections/10_Geometry Resources.tex
+INPUT ./sections/10_Geometry Resources.tex
+INPUT ./sections/10_Geometry Resources.tex
+INPUT ./sections/10_Geometry Resources.tex
+INPUT sections/10_Geometry Resources.tex
+INPUT ./sections/11_Extensions and Addons.tex
+INPUT ./sections/11_Extensions and Addons.tex
+INPUT ./sections/11_Extensions and Addons.tex
+INPUT ./sections/11_Extensions and Addons.tex
+INPUT sections/11_Extensions and Addons.tex
+INPUT ./sections/12_Packaging.tex
+INPUT ./sections/12_Packaging.tex
+INPUT ./sections/12_Packaging.tex
+INPUT ./sections/12_Packaging.tex
+INPUT sections/12_Packaging.tex
+INPUT ./sections/13_Compatibility and Validation.tex
+INPUT ./sections/13_Compatibility and Validation.tex
+INPUT ./sections/13_Compatibility and Validation.tex
+INPUT ./sections/13_Compatibility and Validation.tex
+INPUT sections/13_Compatibility and Validation.tex
+INPUT ./sections/A_Minimal_MIFX.tex
+INPUT ./sections/A_Minimal_MIFX.tex
+INPUT ./sections/A_Minimal_MIFX.tex
+INPUT ./sections/A_Minimal_MIFX.tex
+INPUT sections/A_Minimal_MIFX.tex
+INPUT ./sections/B_Milling_Example.tex
+INPUT ./sections/B_Milling_Example.tex
+INPUT ./sections/B_Milling_Example.tex
+INPUT ./sections/B_Milling_Example.tex
+INPUT sections/B_Milling_Example.tex
+INPUT ./sections/C_Tool_Example.tex
+INPUT ./sections/C_Tool_Example.tex
+INPUT ./sections/C_Tool_Example.tex
+INPUT ./sections/C_Tool_Example.tex
+INPUT sections/C_Tool_Example.tex
+INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/lm/ts1lmtt.fd
+INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/lm/ts1lmtt.fd
+INPUT /usr/local/texlive/2025/texmf-dist/tex/latex/lm/ts1lmtt.fd
+INPUT /usr/local/texlive/2025/texmf-dist/fonts/tfm/public/lm/ts1-lmtt10.tfm
+INPUT ./sections/D_Complete MIFX Package Structure.tex
+INPUT ./sections/D_Complete MIFX Package Structure.tex
+INPUT ./sections/D_Complete MIFX Package Structure.tex
+INPUT ./sections/D_Complete MIFX Package Structure.tex
+INPUT sections/D_Complete MIFX Package Structure.tex
 INPUT main.aux
 INPUT ./main.out
 INPUT ./main.out
@@ -371,4 +406,5 @@ INPUT /usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/lmbx12.pfb
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/lmr10.pfb
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/lmr12.pfb
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/lmr17.pfb
+INPUT /usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/lmri10.pfb
 INPUT /usr/local/texlive/2025/texmf-dist/fonts/type1/public/lm/lmtt10.pfb

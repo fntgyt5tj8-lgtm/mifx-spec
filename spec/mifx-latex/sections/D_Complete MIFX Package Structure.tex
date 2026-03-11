@@ -1,0 +1,75 @@
+\section{Complete MIFX Package Structure}
+
+The following example illustrates the complete directory structure of a MIFX package.
+
+\begin{verbatim}
+job.mifx
+|
++-- job.json
+|
++-- setups/
+|   +-- set-1/
+|   |   +-- setup.json
+|   |   +-- notes.json
+|   |   +-- offset.json
+|   |   +-- part.json
+|   |   +-- stock.json
+|   |   +-- fixture.json
+|   |   |
+|   |   +-- addons/
+|   |   |   \-- setup-addon-1.json
+|   |   |
+|   |   \-- operations/
+|   |       +-- op-1.json
+|   |       +-- op-2.json
+|   |       |
+|   |       +-- cldata/
+|   |       |   +-- op-1.apt
+|   |       |   \-- op-2.apt
+|   |       |
+|   |       +-- csys/
+|   |       +-- offsets/
+|   |       +-- compensation/
+|   |       +-- cutting_conditions/
+|   |       +-- extensions/
+|   |       |
+|   |       \-- addons/
+|   |           +-- op-1.json
+|   |           \-- op-2.json
+|   |
+|   \-- set-2/
+|       +-- setup.json
+|       \-- operations/
+|
++-- tools/
+|   +-- main.json
+|   |
+|   \-- main/
+|       +-- 1.json
+|       +-- 2.json
+|       |
+|       +-- profile/
+|       |   +-- 1.json
+|       |   \-- 2.json
+|       |
+|       +-- controls/
+|       |   +-- 1.json
+|       |   \-- 2.json
+|       |
+|       \-- extensions/
+|           +-- 1.json
+|           \-- 2.json
+|
++-- geometry/
+|   +-- setups/
+|   +-- parts/
+|   +-- stock/
+|   \-- fixtures/
+|
++-- in_process/
+|   +-- op1-5.json
+|   \-- op6-10.json
+|
+\-- addons/
+    \-- index.json
+\end{verbatim}

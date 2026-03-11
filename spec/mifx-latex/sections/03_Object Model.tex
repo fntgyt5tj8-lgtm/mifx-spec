@@ -1,0 +1,66 @@
+\section{Object Model}
+
+MIFX represents machining data as a collection of independent objects stored as JSON files within the package.
+
+Each object describes a specific aspect of the machining process and may reference additional data through artifacts.
+
+This design allows systems to interpret only the parts of the package they understand while safely ignoring unsupported objects or extensions.
+
+\subsection{Primary Objects}
+
+The core MIFX object types are:
+
+\begin{itemize}
+\item \textbf{Job} — the root object describing the machining package
+\item \textbf{Setup} — a manufacturing setup configuration
+\item \textbf{Operation} — an individual machining operation
+\item \textbf{Tool} — a cutting tool definition
+\item \textbf{In-Process} — an optional intermediate workpiece state
+\end{itemize}
+
+Each object is stored as a JSON file and may reference additional resources through artifacts.
+
+\subsection{Object Identity}
+
+Each object must define an identifier using the \texttt{id} field.
+
+Example:
+
+\begin{verbatim}
+{
+  "id": "op-2"
+}
+\end{verbatim}
+
+Object identity is defined by the \texttt{id} field rather than by the filename.  
+File names within the package are therefore not required to follow a specific naming convention.
+
+\subsection{Object References}
+
+Objects may reference other objects or resources using relative file paths.
+
+Example:
+
+\begin{verbatim}
+{
+  "id": "op-2",
+  "artifacts": [
+    {
+      "role": "tool",
+      "kind": "json",
+      "path": "../../tools/main/2.json",
+      "present": true
+    }
+  ]
+}
+\end{verbatim}
+
+This approach allows the package to behave as a lightweight object graph where nodes reference related resources.
+
+\subsection{Object Independence}
+
+Objects within a MIFX package are designed to be loosely coupled.
+
+Software implementations may interpret only the objects and artifacts relevant to their functionality while ignoring unsupported elements.
+
+This design enables interoperability between systems with different capabilities while maintaining forward compatibility.

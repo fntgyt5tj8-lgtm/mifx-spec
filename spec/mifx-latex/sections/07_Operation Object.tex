@@ -1,0 +1,129 @@
+\section{Operation Object}
+
+An Operation object represents a machining operation within a setup.
+
+Operations define the machining actions performed on the workpiece and reference the resources required to execute those actions, such as toolpaths, tools, coordinate systems, and process parameters.
+
+Each operation is stored as an independent JSON object within the \texttt{operations} directory of a setup.
+
+Example location:
+
+\begin{verbatim}
+setups/set-1/operations/op-2.json
+\end{verbatim}
+
+\subsection{Operation Structure}
+
+An Operation object typically contains:
+
+\begin{itemize}
+\item an operation identifier
+\item a role describing the operation category
+\item a kind describing the machining process
+\item an optional descriptive name
+\item a strategy identifier
+\item artifact references to associated resources
+\end{itemize}
+
+Example:
+
+\begin{verbatim}
+{
+  "id": "op-2",
+  "role": "toolpath",
+  "kind": "mill",
+  "name": "Face1",
+  "strategy": "face",
+
+  "artifacts": [
+    {
+      "role": "tool",
+      "kind": "json",
+      "path": "../../tools/main/2.json",
+      "present": true
+    },
+    {
+      "role": "toolpath",
+      "kind": "apt",
+      "path": "cldata/op-2.apt",
+      "present": true
+    }
+  ]
+}
+\end{verbatim}
+
+\subsection{Operation Identifier}
+
+Each operation must define a unique identifier using the \texttt{id} field.
+
+Example:
+
+\begin{verbatim}
+"id": "op-2"
+\end{verbatim}
+
+The identifier allows the operation to be referenced by other objects within the package.
+
+\subsection{Operation Role}
+
+The \texttt{role} field describes the semantic purpose of the operation.
+
+Typical roles may include:
+
+\begin{itemize}
+\item \texttt{toolpath}
+\item \texttt{probe}
+\item \texttt{manual}
+\end{itemize}
+
+The specification does not restrict operation roles to a fixed set.
+
+\subsection{Operation Kind}
+
+The \texttt{kind} field describes the machining process category.
+
+Examples include:
+
+\begin{itemize}
+\item \texttt{mill}
+\item \texttt{turn}
+\item \texttt{wire\_edm}
+\item \texttt{probe}
+\end{itemize}
+
+This value helps software systems determine how the operation should be interpreted.
+
+\subsection{Strategy}
+
+The \texttt{strategy} field identifies the machining strategy used by the operation.
+
+Examples include:
+
+\begin{itemize}
+\item \texttt{face}
+\item \texttt{contour}
+\item \texttt{adaptive}
+\item \texttt{drill}
+\end{itemize}
+
+The strategy field is informational and may vary depending on the exporting CAM system.
+
+\subsection{Operation Artifacts}
+
+Operations reference associated resources through artifacts.
+
+Common artifacts associated with operations include:
+
+\begin{itemize}
+\item tool definitions
+\item toolpath files
+\item coordinate system definitions
+\item cutting condition definitions
+\item compensation definitions
+\item operation offsets
+\item notes or documentation
+\end{itemize}
+
+These resources are stored as separate files within the operation directory.
+
+Software implementations may interpret only the artifacts they support while ignoring unsupported elements.

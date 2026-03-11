@@ -1,0 +1,112 @@
+\section{Setup Object}
+
+A Setup object represents a machining setup within a MIFX package.
+
+A setup describes the configuration in which machining operations are executed.  
+This may include information such as setup geometry, coordinate systems, and associated operations.
+
+Each setup is stored as an independent JSON object within the \texttt{setups} directory.
+
+Example location:
+
+\begin{verbatim}
+setups/set-1/setup.json
+\end{verbatim}
+
+\subsection{Setup Structure}
+
+A Setup object typically contains:
+
+\begin{itemize}
+\item a unique identifier
+\item a setup index
+\item a descriptive name
+\item optional artifacts describing setup resources
+\item a list of operations executed within the setup
+\end{itemize}
+
+Example:
+
+\begin{verbatim}
+{
+  "id": "set-1",
+  "index": 1,
+  "name": "1st setup",
+
+  "artifacts": [
+    {
+      "role": "setup_offset",
+      "kind": "json",
+      "path": "offset.json",
+      "present": true
+    }
+  ],
+
+  "operations": [
+    {
+      "id": "op-1",
+      "path": "operations/op-1.json"
+    },
+    {
+      "id": "op-2",
+      "path": "operations/op-2.json"
+    }
+  ]
+}
+\end{verbatim}
+
+\subsection{Setup Identifier}
+
+Each setup must define an identifier using the \texttt{id} field.
+
+Example:
+
+\begin{verbatim}
+"id": "set-1"
+\end{verbatim}
+
+The identifier is used by other objects within the package to reference the setup.
+
+\subsection{Setup Index}
+
+The \texttt{index} field indicates the logical order of the setup within the machining job.
+
+Example:
+
+\begin{verbatim}
+"index": 1
+\end{verbatim}
+
+This value is typically determined by the exporting CAM system.
+
+\subsection{Operations}
+
+The \texttt{operations} array defines the machining operations executed in the setup.
+
+Each entry references an Operation object stored in the \texttt{operations} directory.
+
+Example:
+
+\begin{verbatim}
+{
+  "id": "op-2",
+  "path": "operations/op-2.json"
+}
+\end{verbatim}
+
+The order of operations in the array represents the execution order of the machining process.
+
+\subsection{Setup Artifacts}
+
+The Setup object may reference additional resources using artifacts.
+
+Common setup artifacts include:
+
+\begin{itemize}
+\item setup coordinate system definitions
+\item setup offsets
+\item setup geometry assemblies
+\item notes or documentation
+\end{itemize}
+
+These resources are stored as separate files within the setup directory.
