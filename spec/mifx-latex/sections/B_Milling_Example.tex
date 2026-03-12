@@ -5,35 +5,32 @@ The following example shows a milling operation using a face milling strategy.
 \begin{verbatim}
 {
   "id": "op-2",
-  "kind": "mill",
   "name": "Face1",
-  "toolRef": "2",
-
   "strategy": "face",
 
-  "cuttingConditions": {
-    "spindle_rpm": 5000,
-    "spindle_dir": "CW",
-    "feed": 40.0,
-    "coolant": "flood"
-  },
-
-  "compensation": {
-    "sets": [
-      {
-        "id": "length",
-        "offsets": [
-          { "number": 2 }
-        ]
-      }
-    ]
-  },
-
   "artifacts": [
+    {
+      "role": "tool",
+      "kind": "json",
+      "path": "../../../tools/main/2.json",
+      "present": true
+    },
     {
       "role": "toolpath",
       "kind": "apt",
       "path": "cldata/op-2.apt",
+      "present": true
+    },
+    {
+      "role": "cutting_condition",
+      "kind": "json",
+      "path": "cutting_conditions/op-2.json",
+      "present": true
+    },
+    {
+      "role": "compensation",
+      "kind": "json",
+      "path": "compensation/op-2.json",
       "present": true
     }
   ]

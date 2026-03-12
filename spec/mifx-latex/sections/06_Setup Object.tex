@@ -2,8 +2,8 @@
 
 A Setup object represents a machining setup within a MIFX package.
 
-A setup describes the configuration in which machining operations are executed.  
-This may include information such as setup geometry, coordinate systems, and associated operations.
+A setup describes the configuration in which machining operations are executed.
+This may include setup-level resources such as part, stock, fixture, setup offsets, notes, and setup assemblies.
 
 Each setup is stored as an independent JSON object within the \texttt{setups} directory.
 
@@ -22,7 +22,7 @@ A Setup object typically contains:
 \item a setup index
 \item a descriptive name
 \item optional artifacts describing setup resources
-\item a list of operations executed within the setup
+\item an ordered list of operations executed within the setup
 \end{itemize}
 
 Example:
@@ -35,6 +35,12 @@ Example:
 
   "artifacts": [
     {
+      "role": "notes",
+      "kind": "json",
+      "path": "notes.json",
+      "present": true
+    },
+    {
       "role": "setup_offset",
       "kind": "json",
       "path": "offset.json",
@@ -45,10 +51,14 @@ Example:
   "operations": [
     {
       "id": "op-1",
+      "role": "toolpath",
+      "kind": "mill",
       "path": "operations/op-1.json"
     },
     {
       "id": "op-2",
+      "role": "toolpath",
+      "kind": "mill",
       "path": "operations/op-2.json"
     }
   ]
@@ -65,8 +75,6 @@ Example:
 "id": "set-1"
 \end{verbatim}
 
-The identifier is used by other objects within the package to reference the setup.
-
 \subsection{Setup Index}
 
 The \texttt{index} field indicates the logical order of the setup within the machining job.
@@ -79,34 +87,45 @@ Example:
 
 This value is typically determined by the exporting CAM system.
 
+\subsection{Setup Artifacts}
+
+The Setup object may reference additional setup-level resources using artifacts.
+
+Common setup artifacts include:
+
+\begin{itemize}
+\item notes
+\item setup offsets
+\item part definitions
+\item stock definitions
+\item fixture definitions
+\item setup assemblies
+\end{itemize}
+
+These resources are stored as separate files within the setup directory.
+
 \subsection{Operations}
 
 The \texttt{operations} array defines the machining operations executed in the setup.
 
-Each entry references an Operation object stored in the \texttt{operations} directory.
+Each entry contains:
+
+\begin{itemize}
+\item the operation identifier
+\item the operation role
+\item the operation kind
+\item the relative path to the Operation object
+\end{itemize}
 
 Example:
 
 \begin{verbatim}
 {
   "id": "op-2",
+  "role": "toolpath",
+  "kind": "mill",
   "path": "operations/op-2.json"
 }
 \end{verbatim}
 
-The order of operations in the array represents the execution order of the machining process.
-
-\subsection{Setup Artifacts}
-
-The Setup object may reference additional resources using artifacts.
-
-Common setup artifacts include:
-
-\begin{itemize}
-\item setup coordinate system definitions
-\item setup offsets
-\item setup geometry assemblies
-\item notes or documentation
-\end{itemize}
-
-These resources are stored as separate files within the setup directory.
+The order of entries in the \texttt{operations} array represents the execution order of the machining process.

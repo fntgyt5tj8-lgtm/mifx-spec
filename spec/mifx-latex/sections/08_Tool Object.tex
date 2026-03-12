@@ -4,7 +4,7 @@ A Tool object describes a cutting tool used by machining operations within a MIF
 
 Tools are defined independently from operations and may be referenced by multiple operations throughout the machining process.
 
-Tool objects are stored within the \texttt{tools} directory and may be organized into tool groups.
+Tool objects are stored within the \texttt{tools} directory and are organized into tool groups.
 
 Example location:
 
@@ -38,9 +38,21 @@ Example:
       "present": true
     },
     {
+      "role": "tool_mount",
+      "kind": "json",
+      "path": "mounts/7.json",
+      "present": true
+    },
+    {
       "role": "tool_controls",
       "kind": "json",
       "path": "controls/7.json",
+      "present": true
+    },
+    {
+      "role": "tool_extensions",
+      "kind": "json",
+      "path": "extensions/7.json",
       "present": true
     }
   ]
@@ -57,7 +69,7 @@ Example:
 "id": "7"
 \end{verbatim}
 
-The identifier is used by operations to reference the tool.
+Tool numbering and group context are defined by the tool group structure rather than by the filename.
 
 \subsection{Tool Artifacts}
 
@@ -89,24 +101,11 @@ Examples include:
 \item mesh representations
 \end{itemize}
 
-Profile definitions are typically stored as JSON objects referenced by the tool.
-
 \subsection{Tool Mount}
 
 Tools may optionally define mounting configurations describing how the tool is oriented relative to the machine spindle.
 
 Mount definitions may include transformation matrices representing angle heads or other mounting devices.
-
-Example artifact:
-
-\begin{verbatim}
-{
-  "role": "tool_mount",
-  "kind": "json",
-  "path": "mounts/7.json",
-  "present": true
-}
-\end{verbatim}
 
 \subsection{Tool Controls}
 
@@ -119,8 +118,6 @@ Examples include:
 \item diameter offsets
 \item control points used by the machining process
 \end{itemize}
-
-These values may correspond to controller parameters such as tool length compensation.
 
 \subsection{Tool Extensions}
 

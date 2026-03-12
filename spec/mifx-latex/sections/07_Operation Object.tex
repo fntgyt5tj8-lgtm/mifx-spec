@@ -2,7 +2,7 @@
 
 An Operation object represents a machining operation within a setup.
 
-Operations define the machining actions performed on the workpiece and reference the resources required to execute those actions, such as toolpaths, tools, coordinate systems, and process parameters.
+Operations define the machining action performed on the workpiece and reference the resources required to execute that action, such as tools, toolpaths, coordinate systems, offsets, compensation, notes, and process parameters.
 
 Each operation is stored as an independent JSON object within the \texttt{operations} directory of a setup.
 
@@ -18,20 +18,18 @@ An Operation object typically contains:
 
 \begin{itemize}
 \item an operation identifier
-\item a role describing the operation category
-\item a kind describing the machining process
 \item an optional descriptive name
 \item a strategy identifier
 \item artifact references to associated resources
 \end{itemize}
+
+The operation role and machining kind are defined by the setup operation index entry rather than repeated within the operation object.
 
 Example:
 
 \begin{verbatim}
 {
   "id": "op-2",
-  "role": "toolpath",
-  "kind": "mill",
   "name": "Face1",
   "strategy": "face",
 
@@ -39,13 +37,19 @@ Example:
     {
       "role": "tool",
       "kind": "json",
-      "path": "../../tools/main/2.json",
+      "path": "../../../tools/main/2.json",
       "present": true
     },
     {
       "role": "toolpath",
       "kind": "apt",
       "path": "cldata/op-2.apt",
+      "present": true
+    },
+    {
+      "role": "operation_csys",
+      "kind": "json",
+      "path": "csys/op-2.json",
       "present": true
     }
   ]
@@ -62,36 +66,7 @@ Example:
 "id": "op-2"
 \end{verbatim}
 
-The identifier allows the operation to be referenced by other objects within the package.
-
-\subsection{Operation Role}
-
-The \texttt{role} field describes the semantic purpose of the operation.
-
-Typical roles may include:
-
-\begin{itemize}
-\item \texttt{toolpath}
-\item \texttt{probe}
-\item \texttt{manual}
-\end{itemize}
-
-The specification does not restrict operation roles to a fixed set.
-
-\subsection{Operation Kind}
-
-The \texttt{kind} field describes the machining process category.
-
-Examples include:
-
-\begin{itemize}
-\item \texttt{mill}
-\item \texttt{turn}
-\item \texttt{wire\_edm}
-\item \texttt{probe}
-\end{itemize}
-
-This value helps software systems determine how the operation should be interpreted.
+The identifier allows the operation to be indexed by the setup and referenced by other objects within the package.
 
 \subsection{Strategy}
 
@@ -122,6 +97,7 @@ Common artifacts associated with operations include:
 \item compensation definitions
 \item operation offsets
 \item notes or documentation
+\item extensions and addons
 \end{itemize}
 
 These resources are stored as separate files within the operation directory.

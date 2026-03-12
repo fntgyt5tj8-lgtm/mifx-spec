@@ -8,32 +8,20 @@ Systems that do not recognize an extension or addon must ignore it and continue 
 
 \subsection{Extensions}
 
-Extensions provide additional metadata attached directly to an object.
+Extensions provide additional structured metadata stored as separate JSON resources associated with an object.
 
-Extensions are embedded within the JSON object using the \texttt{extensions} field.
+Extensions are typically stored in an \texttt{extensions} directory adjacent to the object domain.
 
-Example:
+Example structure:
 
 \begin{verbatim}
-{
-  "id": "op-2",
-  "kind": "mill",
-  "name": "Face1",
-
-  "extensions": {
-    "tolerance": {
-      "value": 0.0004,
-      "level": "system"
-    },
-    "contour_tolerance": {
-      "value": 0.0002,
-      "level": "system"
-    }
-  }
-}
+setups/
+  set-1/
+    operations/
+      extensions/
+        op-1.json
+        op-2.json
 \end{verbatim}
-
-Extensions may contain any JSON structure.
 
 The meaning of extension fields is defined by the producing system.
 
@@ -41,9 +29,9 @@ Implementations that do not understand an extension must ignore it.
 
 \subsection{Addons}
 
-Addons provide larger or more structured extensions stored as separate JSON resources.
+Addons provide larger or more structured external attachments stored as separate JSON resources.
 
-Addons are placed inside the \texttt{addons} directory associated with a specific object.
+Addons are placed inside an \texttt{addons} directory associated with a specific object or package domain.
 
 Example structure:
 
@@ -63,7 +51,7 @@ Addons allow complex extensions to be attached without modifying the base object
 
 \subsection{Addon Referencing}
 
-Addons are implicitly associated with the object directory in which they reside.
+Addons are associated with the object directory in which they reside.
 
 For example:
 

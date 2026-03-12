@@ -19,6 +19,7 @@ job.mifx
 |               \-- op-1.apt
 |
 \-- tools/
+    +-- main.json
     \-- main/
         \-- 1.json
 \end{verbatim}
@@ -36,7 +37,21 @@ job.mifx
         "linear": "mm"
       }
     }
-  }
+  },
+  "setups": [
+    {
+      "id": "set-1",
+      "path": "setups/set-1/setup.json"
+    }
+  ],
+  "tools": [
+    {
+      "role": "tool_group",
+      "kind": "json",
+      "path": "tools/main.json",
+      "present": true
+    }
+  ]
 }
 \end{verbatim}
 
@@ -46,7 +61,15 @@ job.mifx
 {
   "id": "set-1",
   "index": 1,
-  "name": "Example Setup"
+  "name": "Example Setup",
+  "operations": [
+    {
+      "id": "op-1",
+      "role": "toolpath",
+      "kind": "mill",
+      "path": "operations/op-1.json"
+    }
+  ]
 }
 \end{verbatim}
 
@@ -55,10 +78,15 @@ job.mifx
 \begin{verbatim}
 {
   "id": "op-1",
-  "kind": "mill",
   "name": "Face",
-  "toolRef": "1",
+  "strategy": "face",
   "artifacts": [
+    {
+      "role": "tool",
+      "kind": "json",
+      "path": "../../../tools/main/1.json",
+      "present": true
+    },
     {
       "role": "toolpath",
       "kind": "apt",
